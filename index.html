@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển Ảnh Thành PDF - Dương Tấn Chánh</title>
+    <!-- Ưu tiên nạp thư viện từ thư mục js/ nội bộ, tự động chuyển sang CDN nếu không tìm thấy file -->
+    <script src="js/jspdf.umd.min.js"></script>
+    <script>
+        if (typeof window.jspdf === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+        }
+    </script>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --color-primary: #0066B6;
+            --color-primary-hover: #4020D0;
+            --color-success: #009911;
+            --color-danger: #FF2040;
+            --color-warning: #EE6000;
+            --color-black: #000000;
+            --color-dark: #1A1A1A;
+            --color-panel: #262626;
+            --color-border: #CCCCCC;
+            --color-white: #FFFFFF;
+            --color-lime: #7FDD0F;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 1rem;
+            font-weight: normal;
+            line-height: 1.5;
+            color: var(--color-black);
+            background-color: var(--color-white);
+            padding: 0.5rem;
+            padding-bottom: 5rem;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-signature {
+            font-size: 1.2rem;
+            font-style: normal;
+            text-align: right;
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .dropzone-container {
+            border: 2px dashed var(--color-primary);
+            border-radius: 0.75rem;
+            background-color: var(--color-white);
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 10rem;
+        }
+
+        .dropzone-container.dragover {
+            background-color: #FFFFFF;
+            border-color: var(--color-primary-hover);
+            outline: 3px solid var(--color-lime);
+        }
+
+        .dropzone-icon {
+            width: 3rem;
+            height: 3rem;
+            fill: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dropzone-text-main {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--color-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .dropzone-text-sub {
+            font-size: 0.9rem;
+            color: var(--color-panel);
+            margin-bottom: 0.75rem;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: currentColor;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: var(--color-white);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #00800e;
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: var(--color-white);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: #d61533;
+        }
+
+        .btn-outline {
+            background-color: var(--color-white);
+            color: var(--color-dark);
+            border: 2px solid var(--color-border);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            border-color: var(--color-dark);
+        }
+
+        .btn-icon-only {
+            padding: 0.3rem 0.5rem;
+            border: 2px solid var(--color-border);
+            border-radius: 0.35rem;
+            background-color: var(--color-white);
+            color: var(--color-dark);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-icon-only:hover:not(:disabled) {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn-icon-only.btn-delete:hover:not(:disabled) {
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+
+        .btn-icon-only:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--color-border);
+        }
+
+        .btn-icon-only svg {
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+        }
+
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: #FFFFFF;
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+        }
+
+        .action-bar-left, .action-bar-right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .list-section {
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            background-color: var(--color-white);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-items-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 28rem;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1rem;
+            color: var(--color-panel);
+            font-style: normal;
+        }
+
+        .image-item-row {
+            display: grid;
+            grid-template-columns: auto 4.5rem 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.5rem;
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            background-color: var(--color-white);
+        }
+
+        .image-index {
+            font-weight: bold;
+            font-size: 0.9rem;
+            width: 1.5rem;
+            text-align: center;
+            color: var(--color-primary);
+        }
+
+        .image-thumbnail-box {
+            width: 4.5rem;
+            height: 3.5rem;
+            background-color: var(--color-panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid var(--color-border);
+            border-radius: 0.35rem;
+        }
+
+        .image-thumbnail-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .image-info-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            overflow: hidden;
+        }
+
+        .image-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: var(--color-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .image-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--color-panel);
+        }
+
+        .badge-dim {
+            display: inline-block;
+            padding: 0.1rem 0.4rem;
+            background-color: #262626;
+            color: var(--color-white);
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 0.25rem;
+        }
+
+        .image-controls {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .status-box {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            background-color: var(--color-white);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-box.info {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .status-box.success {
+            border-color: var(--color-success);
+            color: var(--color-success);
+        }
+
+        .status-box.error {
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+
+        .status-icon {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .info-card {
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            background-color: var(--color-white);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .info-card ul {
+            padding-left: 1.2rem;
+            margin-top: 0.25rem;
+        }
+
+        .info-card li {
+            margin-bottom: 0.25rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .image-item-row {
+                grid-template-columns: auto 3.5rem 1fr;
+                grid-template-rows: auto auto;
+            }
+            .image-controls {
+                grid-column: 1 / -1;
+                justify-content: flex-end;
+                border-top: 2px solid var(--color-border);
+                padding-top: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CHUYỂN ẢNH THÀNH PDF</h1>
+    <div class="author-signature">Dương Tấn Chánh</div>
+
+    <!-- KHU VỰC KÉO THẢ & CHỌN FILE -->
+    <div class="dropzone-container" id="drop-zone">
+        <svg class="dropzone-icon" viewBox="0 0 24 24">
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+        </svg>
+        <div class="dropzone-text-main">Kéo thả các tập tin ảnh vào đây hoặc dán ảnh (Ctrl + V)</div>
+        <div class="dropzone-text-sub">Hỗ trợ định dạng: JPG, PNG, WEBP, GIF, BMP</div>
+        <button type="button" class="btn btn-primary" id="btn-browse">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Chọn ảnh từ thiết bị
+        </button>
+        <input type="file" id="file-input" class="hidden-file-input" multiple accept="image/*">
+    </div>
+
+    <!-- THANH ĐIỀU KHIỂN CHÍNH -->
+    <div class="action-bar">
+        <div class="action-bar-left">
+            <button type="button" class="btn btn-danger" id="btn-clear-all">
+                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                Xoá tất cả
+            </button>
+            <button type="button" class="btn btn-outline" id="btn-reverse-order">
+                <svg viewBox="0 0 24 24"><path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/></svg>
+                Đảo thứ tự
+            </button>
+        </div>
+        <div class="action-bar-right">
+            <button type="button" class="btn btn-success" id="btn-export-pdf">
+                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+                Tạo và tải file PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- HỘP THÔNG BÁO TRẠNG THÁI -->
+    <div class="status-box info" id="status-box">
+        <svg class="status-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span id="status-text">Vui lòng chọn hoặc kéo thả các file ảnh vào hệ thống.</span>
+    </div>
+
+    <!-- DANH SÁCH ẢNH ĐÃ CHỌN -->
+    <div class="list-section">
+        <div class="list-header">
+            <h3>Danh sách trang PDF (<span id="total-count">0</span> ảnh)</h3>
+            <span id="total-dimensions-summary"></span>
+        </div>
+        <div class="image-items-wrapper" id="image-list-container">
+            <div class="empty-state" id="empty-state">Chưa có ảnh nào được thêm vào danh sách.</div>
+        </div>
+    </div>
+
+    <!-- THÔNG TIN HƯỚNG DẪN KỸ THUẬT -->
+    <div class="info-card">
+        <h4>Quy tắc hoạt động chuẩn kích thước:</h4>
+        <ul>
+            <li>Mỗi trang PDF sẽ được tạo ra với kích thước (Pixel) chính xác 100% theo chiều rộng và chiều cao gốc của từng bức ảnh.</li>
+            <li>Tự động nhận diện hướng khổ ngang (Landscape) hoặc khổ dọc (Portrait) riêng cho từng trang.</li>
+            <li>Không làm biến dạng tỉ lệ, không xuất hiện viền trắng thừa xung quanh trang.</li>
+        </ul>
+    </div>
+
+    <script>
+        // Mảng chứa danh sách ảnh
+        let imageItems = [];
+
+        // Tham chiếu các phần tử DOM
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const btnBrowse = document.getElementById('btn-browse');
+        const btnClearAll = document.getElementById('btn-clear-all');
+        const btnReverseOrder = document.getElementById('btn-reverse-order');
+        const btnExportPdf = document.getElementById('btn-export-pdf');
+        const imageListContainer = document.getElementById('image-list-container');
+        const emptyState = document.getElementById('empty-state');
+        const totalCountEl = document.getElementById('total-count');
+        const statusBox = document.getElementById('status-box');
+        const statusText = document.getElementById('status-text');
+
+        // Hàm cập nhật hộp trạng thái
+        function updateStatus(message, type = 'info') {
+            statusText.textContent = message;
+            statusBox.className = 'status-box ' + type;
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>';
+            } else if (type === 'error') {
+                iconSvg = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>';
+            } else {
+                iconSvg = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>';
+            }
+            statusBox.querySelector('.status-icon').innerHTML = iconSvg;
+        }
+
+        // Định dạng dung lượng file
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            const formatted = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+            return formatted.toLocaleString('vi-VN') + ' ' + sizes[i];
+        }
+
+        // Đọc thông tin file ảnh bất đồng bộ
+        function parseImageFile(file) {
+            return new Promise((resolve, reject) => {
+                if (!file.type.startsWith('image/')) {
+                    reject(new Error('Tập tin không phải là hình ảnh hợp lệ'));
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    const img = new Image();
+                    img.onload = () => {
+                        resolve({
+                            id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                            name: file.name || 'anh-khong-ten.png',
+                            size: file.size,
+                            sizeFormatted: formatBytes(file.size),
+                            width: img.naturalWidth,
+                            height: img.naturalHeight,
+                            dataUrl: dataUrl,
+                            format: file.type.includes('png') ? 'PNG' : 'JPEG',
+                            orientation: img.naturalWidth >= img.naturalHeight ? 'landscape' : 'portrait'
+                        });
+                    };
+                    img.onerror = () => reject(new Error('Không thể tải dữ liệu ảnh'));
+                    img.src = dataUrl;
+                };
+                reader.onerror = () => reject(new Error('Lỗi khi đọc tập tin'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Xử lý tiếp nhận danh sách tập tin
+        async function handleIncomingFiles(fileList) {
+            const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+            if (files.length === 0) {
+                updateStatus('Không tìm thấy tập tin hình ảnh hợp lệ nào.', 'error');
+                return;
+            }
+
+            updateStatus(`Đang phân tích ${files.length} tập tin ảnh...`, 'info');
+
+            let successCount = 0;
+            for (const file of files) {
+                try {
+                    const item = await parseImageFile(file);
+                    imageItems.push(item);
+                    successCount++;
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            renderImageList();
+            updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
+        }
+
+        // Vẽ lại danh sách giao diện
+        function renderImageList() {
+            totalCountEl.textContent = imageItems.length.toLocaleString('vi-VN');
+
+            if (imageItems.length === 0) {
+                imageListContainer.innerHTML = '';
+                imageListContainer.appendChild(emptyState);
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            imageListContainer.innerHTML = '';
+
+            imageItems.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'image-item-row';
+
+                const orientationText = item.orientation === 'landscape' ? 'Khổ ngang' : 'Khổ dọc';
+
+                row.innerHTML = `
+                    <div class="image-index">${index + 1}</div>
+                    <div class="image-thumbnail-box">
+                        <img src="${item.dataUrl}" alt="${item.name}">
+                    </div>
+                    <div class="image-info-box">
+                        <div class="image-name" title="${item.name}">${item.name}</div>
+                        <div class="image-specs">
+                            <span class="badge-dim">${item.width} × ${item.height} px</span>
+                            <span>${item.sizeFormatted}</span>
+                            <span>${orientationText}</span>
+                        </div>
+                    </div>
+                    <div class="image-controls">
+                        <button type="button" class="btn-icon-only btn-move-up" title="Di chuyển lên" ${index === 0 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+                        </button>
+                        <button type="button" class="btn-icon-only btn-move-down" title="Di chuyển xuống" ${index === imageItems.length - 1 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                        </button>
+                        <button type="button" class="btn-icon-only btn-delete" title="Xoá ảnh này">
+                            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </button>
+                    </div>
+                `;
+
+                const btnUp = row.querySelector('.btn-move-up');
+                const btnDown = row.querySelector('.btn-move-down');
+                const btnDelete = row.querySelector('.btn-delete');
+
+                if (index > 0) {
+                    btnUp.addEventListener('click', () => {
+                        const temp = imageItems[index];
+                        imageItems[index] = imageItems[index - 1];
+                        imageItems[index - 1] = temp;
+                        renderImageList();
+                    });
+                }
+
+                if (index < imageItems.length - 1) {
+                    btnDown.addEventListener('click', () => {
+                        const temp = imageItems[index];
+                        imageItems[index] = imageItems[index + 1];
+                        imageItems[index + 1] = temp;
+                        renderImageList();
+                    });
+                }
+
+                btnDelete.addEventListener('click', () => {
+                    imageItems.splice(index, 1);
+                    renderImageList();
+                    updateStatus('Đã xoá một ảnh khỏi danh sách.', 'info');
+                });
+
+                imageListContainer.appendChild(row);
+            });
+        }
+
+        // Chọn file qua nút bấm
+        btnBrowse.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                handleIncomingFiles(e.target.files);
+                fileInput.value = '';
+            }
+        });
+
+        // Kéo thả tập tin (Drag & Drop)
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleIncomingFiles(e.dataTransfer.files);
+            }
+        });
+
+        // Dán ảnh từ clipboard (Ctrl + V)
+        window.addEventListener('paste', (e) => {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (!clipboardData || !clipboardData.items) return;
+
+            const pastedFiles = [];
+            for (let i = 0; i < clipboardData.items.length; i++) {
+                const item = clipboardData.items[i];
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        pastedFiles.push(file);
+                    }
+                }
+            }
+
+            if (pastedFiles.length > 0) {
+                handleIncomingFiles(pastedFiles);
+            }
+        });
+
+        // Nút xoá tất cả
+        btnClearAll.addEventListener('click', () => {
+            if (imageItems.length === 0) return;
+            if (confirm('Bạn có chắc chắn muốn xoá toàn bộ danh sách ảnh không?')) {
+                imageItems = [];
+                renderImageList();
+                updateStatus('Đã làm trống danh sách.', 'info');
+            }
+        });
+
+        // Nút đảo thứ tự
+        btnReverseOrder.addEventListener('click', () => {
+            if (imageItems.length <= 1) return;
+            imageItems.reverse();
+            renderImageList();
+            updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
+        });
+
+        // Nút xuất file PDF
+        btnExportPdf.addEventListener('click', async () => {
+            if (imageItems.length === 0) {
+                alert('Vui lòng thêm ít nhất một hình ảnh vào danh sách trước khi xuất PDF!');
+                updateStatus('Danh sách đang trống, không thể tạo PDF.', 'error');
+                return;
+            }
+
+            if (typeof window.jspdf === 'undefined') {
+                alert('Không thể kết nối đến thư viện jsPDF. Vui lòng kiểm tra lại file trong thư mục js/ hoặc kết nối Internet!');
+                updateStatus('Lỗi: Thư viện tạo PDF không khả dụng.', 'error');
+                return;
+            }
+
+            btnExportPdf.disabled = true;
+            updateStatus('Đang khởi tạo tài liệu PDF chuẩn kích thước...', 'info');
+
+            try {
+                const { jsPDF } = window.jspdf;
+
+                // Khởi tạo trang 1
+                const first = imageItems[0];
+                const doc = new jsPDF({
+                    orientation: first.orientation,
+                    unit: 'px',
+                    format: [first.width, first.height],
+                    hotfixes: ['px_scaling']
+                });
+
+                doc.addImage(first.dataUrl, first.format, 0, 0, first.width, first.height);
+
+                // Các trang tiếp theo
+                for (let i = 1; i < imageItems.length; i++) {
+                    const current = imageItems[i];
+                    updateStatus(`Đang ghép trang ${i + 1}/${imageItems.length} (${current.width} × ${current.height} px)...`, 'info');
+                    
+                    doc.addPage([current.width, current.height], current.orientation);
+                    doc.addImage(current.dataUrl, current.format, 0, 0, current.width, current.height);
+                }
+
+                // Đặt tên file theo thời gian thực
+                const now = new Date();
+                const dateStr = now.getFullYear().toString() + 
+                                String(now.getMonth() + 1).padStart(2, '0') + 
+                                String(now.getDate()).padStart(2, '0') + '_' +
+                                String(now.getHours()).padStart(2, '0') + 
+                                String(now.getMinutes()).padStart(2, '0');
+                                
+                const fileName = `chuyen_anh_thanh_pdf_${dateStr}.pdf`;
+                doc.save(fileName);
+
+                updateStatus(`Đã xuất thành công file "${fileName}" (${imageItems.length} trang).`, 'success');
+            } catch (err) {
+                console.error(err);
+                updateStatus('Đã xảy ra lỗi trong quá trình tạo file PDF.', 'error');
+            } finally {
+                btnExportPdf.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
