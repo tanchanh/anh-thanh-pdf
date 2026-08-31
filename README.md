@@ -1,4 +1,4 @@
-# 📄 TRÌNH GHÉP ẢNH THÀNH PDF THEO KÍCH THƯỚC GỐC
+# 📄 TRÌNH CHUYỂN ẢNH THÀNH FILE PDF
 
 > **Tác giả:** Dương Tấn Chánh  
 > **Nền tảng:** Single-page Web Application (HTML5 / CSS3 / Vanilla JavaScript)  
@@ -8,7 +8,7 @@
 
 ## 🌟 Giới thiệu
 
-**Trình Ghép Ảnh Thành PDF Theo Kích Thước Gốc** là một công cụ web mã nguồn mở, hoạt động 100% phía trình duyệt (Client-side). Ứng dụng giải quyết triệt để vấn đề ảnh bị méo tỉ lệ hoặc bị chèn viền trắng thừa khi chuyển đổi sang PDF theo các khổ giấy tiêu chuẩn (như A4/Letter). 
+**TRÌNH CHUYỂN ẢNH THÀNH FILE PDF** là một công cụ web mã nguồn mở, hoạt động 100% phía trình duyệt (Client-side). Ứng dụng giải quyết triệt để vấn đề ảnh bị méo tỉ lệ hoặc bị chèn viền trắng thừa khi chuyển đổi sang PDF theo các khổ giấy tiêu chuẩn (như A4/Letter). 
 
 Mỗi trang trong file PDF xuất ra sẽ có **kích thước (Pixel) và hướng xoay (Ngang/Dọc) trùng khớp chính xác tuyệt đối với từng bức ảnh gốc**.
 
