@@ -124,7 +124,6 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Ẩn input an toàn cho trình duyệt di động */
         .hidden-file-input {
             position: absolute;
             width: 1px;
@@ -205,37 +204,40 @@
             border-color: var(--color-dark);
         }
 
-        .btn-icon-only {
-            padding: 0.3rem 0.5rem;
+        .btn-control {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: bold;
             border: 2px solid var(--color-border);
             border-radius: 0.35rem;
             background-color: var(--color-white);
             color: var(--color-dark);
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
             transition: border-color 0.2s, color 0.2s;
         }
 
-        .btn-icon-only:hover:not(:disabled) {
+        .btn-control:hover:not(:disabled) {
             border-color: var(--color-primary);
             color: var(--color-primary);
         }
 
-        .btn-icon-only.btn-delete:hover:not(:disabled) {
+        .btn-control.btn-delete:hover:not(:disabled) {
             border-color: var(--color-danger);
             color: var(--color-danger);
         }
 
-        .btn-icon-only:disabled {
+        .btn-control:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             border-color: var(--color-border);
             pointer-events: none;
         }
 
-        .btn-icon-only svg {
+        .btn-control svg {
             width: 1rem;
             height: 1rem;
             fill: currentColor;
@@ -281,53 +283,62 @@
         .image-items-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            max-height: 28rem;
+            gap: 0.75rem;
+            max-height: 32rem;
             overflow-y: auto;
             padding-right: 0.25rem;
         }
 
         .empty-state {
             text-align: center;
-            padding: 1rem;
+            padding: 1.5rem;
             color: var(--color-panel);
             font-style: normal;
         }
 
-        .image-item-row {
-            display: grid;
-            grid-template-columns: auto 4.5rem 1fr auto;
+        /* Bố cục thẻ ảnh chống đè chữ & phóng to thumbnail */
+        .image-item-card {
+            display: flex;
+            flex-direction: column;
             gap: 0.5rem;
-            align-items: center;
             padding: 0.5rem;
             border: 2px solid var(--color-border);
             border-radius: 0.5rem;
             background-color: var(--color-white);
         }
 
+        .image-item-body {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            min-width: 0;
+        }
+
         .image-index {
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
             width: 1.5rem;
             text-align: center;
             color: var(--color-primary);
+            flex-shrink: 0;
         }
 
         .image-thumbnail-box {
-            width: 4.5rem;
-            height: 3.5rem;
+            width: 5.5rem;
+            height: 5.5rem;
             background-color: var(--color-panel);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             border: 2px solid var(--color-border);
-            border-radius: 0.35rem;
+            border-radius: 0.5rem;
+            flex-shrink: 0;
         }
 
         .image-thumbnail-box img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             display: block;
         }
@@ -335,8 +346,10 @@
         .image-info-box {
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0.35rem;
             overflow: hidden;
+            min-width: 0;
+            flex: 1;
         }
 
         .image-name {
@@ -351,14 +364,14 @@
         .image-specs {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.4rem;
             font-size: 0.85rem;
             color: var(--color-panel);
         }
 
         .badge-dim {
             display: inline-block;
-            padding: 0.1rem 0.4rem;
+            padding: 0.15rem 0.4rem;
             background-color: #262626;
             color: var(--color-white);
             font-size: 0.8rem;
@@ -366,10 +379,12 @@
             border-radius: 0.25rem;
         }
 
-        .image-controls {
+        .image-item-footer {
             display: flex;
-            gap: 0.25rem;
-            align-items: center;
+            justify-content: flex-end;
+            gap: 0.4rem;
+            border-top: 2px solid #F0F0F0;
+            padding-top: 0.4rem;
         }
 
         .status-box {
@@ -409,19 +424,6 @@
         .hidden {
             display: none;
         }
-
-        @media (max-width: 600px) {
-            .image-item-row {
-                grid-template-columns: auto 3.5rem 1fr;
-                grid-template-rows: auto auto;
-            }
-            .image-controls {
-                grid-column: 1 / -1;
-                justify-content: flex-end;
-                border-top: 2px solid var(--color-border);
-                padding-top: 0.3rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -437,7 +439,7 @@
         <div class="dropzone-text-main">Kéo thả các tập tin ảnh vào đây hoặc dán ảnh (Ctrl + V)</div>
         <div class="dropzone-text-sub">Hỗ trợ tự động chuẩn hoá góc xoay: JPG, PNG, WEBP, HEIC, BMP</div>
         
-        <!-- Nút chọn file chuẩn thẻ LABEL: Hoạt động 100% trên điện thoại -->
+        <!-- Thẻ LABEL kích hoạt bộ chọn ảnh cấp phần cứng trên điện thoại -->
         <label for="file-input" class="btn btn-primary" id="btn-browse">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             Chọn ảnh từ thiết bị
@@ -557,7 +559,7 @@
             });
         }
 
-        // Fallback tái tạo qua Image
+        // Fallback qua thẻ Image
         function fallbackWithImageElement(file, resolve, reject) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -619,7 +621,7 @@
             updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
         }
 
-        // Vẽ lại danh sách giao diện
+        // Vẽ lại danh sách giao diện dạng thẻ Card chống đè chữ
         function renderImageList() {
             totalCountEl.textContent = imageItems.length.toLocaleString('vi-VN');
 
@@ -634,40 +636,45 @@
             imageListContainer.innerHTML = '';
 
             imageItems.forEach((item, index) => {
-                const row = document.createElement('div');
-                row.className = 'image-item-row';
+                const card = document.createElement('div');
+                card.className = 'image-item-card';
 
                 const orientationText = item.width > item.height ? 'Khổ ngang' : 'Khổ dọc';
 
-                row.innerHTML = `
-                    <div class="image-index">${index + 1}</div>
-                    <div class="image-thumbnail-box">
-                        <img src="${item.dataUrl}" alt="${item.name}">
-                    </div>
-                    <div class="image-info-box">
-                        <div class="image-name" title="${item.name}">${item.name}</div>
-                        <div class="image-specs">
-                            <span class="badge-dim">${item.width} × ${item.height} px</span>
-                            <span>${item.sizeFormatted}</span>
-                            <span>${orientationText}</span>
+                card.innerHTML = `
+                    <div class="image-item-body">
+                        <div class="image-index">${index + 1}</div>
+                        <div class="image-thumbnail-box">
+                            <img src="${item.dataUrl}" alt="${item.name}">
+                        </div>
+                        <div class="image-info-box">
+                            <div class="image-name" title="${item.name}">${item.name}</div>
+                            <div class="image-specs">
+                                <span class="badge-dim">${item.width} × ${item.height} px</span>
+                                <span>${item.sizeFormatted}</span>
+                                <span>${orientationText}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="image-controls">
-                        <button type="button" class="btn-icon-only btn-move-up" title="Di chuyển lên" ${index === 0 ? 'disabled' : ''}>
+                    <div class="image-item-footer">
+                        <button type="button" class="btn-control btn-move-up" ${index === 0 ? 'disabled' : ''}>
                             <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+                            Lên
                         </button>
-                        <button type="button" class="btn-icon-only btn-move-down" title="Di chuyển xuống" ${index === imageItems.length - 1 ? 'disabled' : ''}>
+                        <button type="button" class="btn-control btn-move-down" ${index === imageItems.length - 1 ? 'disabled' : ''}>
                             <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                            Xuống
                         </button>
-                        <button type="button" class="btn-icon-only btn-delete" title="Xoá ảnh này">
+                        <button type="button" class="btn-control btn-delete">
                             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            Xoá
                         </button>
                     </div>
                 `;
 
-                const btnUp = row.querySelector('.btn-move-up');
-                const btnDown = row.querySelector('.btn-move-down');
-                const btnDelete = row.querySelector('.btn-delete');
+                const btnUp = card.querySelector('.btn-move-up');
+                const btnDown = card.querySelector('.btn-move-down');
+                const btnDelete = card.querySelector('.btn-delete');
 
                 if (index > 0) {
                     btnUp.addEventListener('click', () => {
@@ -693,7 +700,7 @@
                     updateStatus('Đã xoá một ảnh khỏi danh sách.', 'info');
                 });
 
-                imageListContainer.appendChild(row);
+                imageListContainer.appendChild(card);
             });
         }
 
