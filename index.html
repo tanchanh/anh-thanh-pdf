@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghép Ảnh Sang PDF Chuẩn Kích Thước - Dương Tấn Chánh</title>
+    <title>Chuyển Ảnh Thành File PDF - Dương Tấn Chánh</title>
     <!-- Ưu tiên nạp thư viện từ thư mục js/ nội bộ, tự động chuyển sang CDN nếu không tìm thấy file -->
     <script src="js/jspdf.umd.min.js"></script>
     <script>
@@ -392,24 +392,6 @@
             flex-shrink: 0;
         }
 
-        .info-card {
-            border: 2px solid var(--color-border);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            background-color: var(--color-white);
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .info-card ul {
-            padding-left: 1.2rem;
-            margin-top: 0.25rem;
-        }
-
-        .info-card li {
-            margin-bottom: 0.25rem;
-        }
-
         .hidden {
             display: none;
         }
@@ -430,7 +412,7 @@
 </head>
 <body>
 
-    <h1>TRÌNH GHÉP ẢNH THÀNH PDF THEO KÍCH THƯỚC GỐC</h1>
+    <h1>Chuyển Ảnh Thành File PDF</h1>
     <div class="author-signature">Dương Tấn Chánh</div>
 
     <!-- KHU VỰC KÉO THẢ & CHỌN FILE -->
@@ -439,7 +421,7 @@
             <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
         </svg>
         <div class="dropzone-text-main">Kéo thả các tập tin ảnh vào đây hoặc dán ảnh (Ctrl + V)</div>
-        <div class="dropzone-text-sub">Đã tối ưu chuẩn hoá 100% ảnh chụp từ điện thoại Samsung, iPhone</div>
+        <div class="dropzone-text-sub">Hỗ trợ tự động chuẩn hoá góc xoay: JPG, PNG, WEBP, HEIC, BMP</div>
         <button type="button" class="btn btn-primary" id="btn-browse">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             Chọn ảnh từ thiết bị
@@ -484,16 +466,6 @@
         </div>
     </div>
 
-    <!-- THÔNG TIN HƯỚNG DẪN KỸ THUẬT -->
-    <div class="info-card">
-        <h4>Cam kết kỹ thuật chuẩn tỉ lệ:</h4>
-        <ul>
-            <li>Khắc phục 100% lỗi ảnh chụp dọc 3000×4000 px bị xoay ngang khi xuất PDF.</li>
-            <li>Tái tạo pixel bằng Canvas chuẩn để đảm bảo ảnh trong PDF đúng 100% như ảnh xem trên màn hình.</li>
-            <li>Không làm co kéo, méo ảnh hoặc thừa khoảng trắng ở mép trang.</li>
-        </ul>
-    </div>
-
     <script>
         // Mảng chứa danh sách ảnh
         let imageItems = [];
@@ -511,7 +483,7 @@
         const statusBox = document.getElementById('status-box');
         const statusText = document.getElementById('status-text');
 
-        // Hàm cập nhật trạng thái
+        // Hàm cập nhật thông báo trạng thái
         function updateStatus(message, type = 'info') {
             statusText.textContent = message;
             statusBox.className = 'status-box ' + type;
@@ -536,7 +508,7 @@
             return formatted.toLocaleString('vi-VN') + ' ' + sizes[i];
         }
 
-        // Chuẩn hoá ảnh bằng Canvas: Tái tạo điểm ảnh thật, triệt tiêu lỗi góc xoay EXIF
+        // Chuẩn hoá ảnh qua Canvas (Khử góc xoay EXIF, tạo điểm ảnh thật 100%)
         function renderToCleanCanvas(file) {
             return new Promise((resolve, reject) => {
                 if (!file.type.startsWith('image/')) {
@@ -544,7 +516,6 @@
                     return;
                 }
 
-                // Cách 1: Sử dụng createImageBitmap chuẩn hoá góc xoay phần cứng
                 if ('createImageBitmap' in window) {
                     createImageBitmap(file, { imageOrientation: 'from-image' })
                         .then((bitmap) => {
@@ -571,7 +542,7 @@
             });
         }
 
-        // Fallback tái tạo qua Image và Canvas
+        // Fallback tái tạo qua Image
         function fallbackWithImageElement(file, resolve, reject) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -630,7 +601,7 @@
             }
 
             renderImageList();
-            updateStatus(`Đã chuẩn hoá thành công ${successCount} ảnh. Sẵn sàng xuất file PDF.`, 'success');
+            updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
         }
 
         // Vẽ lại danh sách giao diện
@@ -711,7 +682,7 @@
             });
         }
 
-        // Chọn file qua nút bấm
+        // Chọn file bằng nút bấm
         btnBrowse.addEventListener('click', () => {
             fileInput.click();
         });
@@ -723,7 +694,7 @@
             }
         });
 
-        // Kéo thả tập tin (Drag & Drop)
+        // Xử lý kéo thả (Drag & Drop)
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -745,7 +716,7 @@
             }
         });
 
-        // Dán ảnh từ clipboard (Ctrl + V)
+        // Dán ảnh từ Clipboard (Ctrl + V)
         window.addEventListener('paste', (e) => {
             const clipboardData = e.clipboardData || window.clipboardData;
             if (!clipboardData || !clipboardData.items) return;
@@ -809,7 +780,6 @@
                 const firstIsLandscape = first.width > first.height;
                 const firstOrient = firstIsLandscape ? 'l' : 'p';
                 
-                // Khởi tạo PDF với kích thước pixel thực
                 const doc = new jsPDF({
                     orientation: firstOrient,
                     unit: 'px',
@@ -817,7 +787,6 @@
                     hotfixes: ['px_scaling']
                 });
 
-                // Lấy kích thước chuẩn xác mà trang PDF vừa nhận
                 const pWidth1 = doc.internal.pageSize.getWidth();
                 const pHeight1 = doc.internal.pageSize.getHeight();
                 doc.addImage(first.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1);
@@ -837,15 +806,16 @@
                     doc.addImage(current.dataUrl, 'JPEG', 0, 0, pWidth, pHeight);
                 }
 
-                // Đặt tên file và kích hoạt tải về
+                // Đặt tên file theo đúng chuẩn yêu cầu: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
                 const now = new Date();
-                const dateStr = now.getFullYear().toString() + 
-                                String(now.getMonth() + 1).padStart(2, '0') + 
-                                String(now.getDate()).padStart(2, '0') + '_' +
-                                String(now.getHours()).padStart(2, '0') + 
-                                String(now.getMinutes()).padStart(2, '0');
-                                
-                const fileName = `ghep_anh_chuan_chieu_${dateStr}.pdf`;
+                const YYYY = now.getFullYear().toString();
+                const MM = String(now.getMonth() + 1).padStart(2, '0');
+                const DD = String(now.getDate()).padStart(2, '0');
+                const HH = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const SS = String(now.getSeconds()).padStart(2, '0');
+                
+                const fileName = `anh_thanh_pdf_${YYYY}${MM}${DD}_${HH}${mm}${SS}.pdf`;
                 doc.save(fileName);
 
                 updateStatus(`Đã xuất thành công file "${fileName}" (${imageItems.length} trang).`, 'success');
