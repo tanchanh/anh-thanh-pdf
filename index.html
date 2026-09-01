@@ -45,6 +45,10 @@
             overflow-wrap: break-word;
         }
 
+        body.modal-open {
+            overflow: hidden;
+        }
+
         h1 {
             font-size: 1.5rem;
             font-weight: bold;
@@ -102,6 +106,14 @@
             background-color: #FFFFFF;
             border-color: var(--color-primary-hover);
             outline: 3px solid var(--color-lime);
+        }
+
+        .dropzone-container * {
+            pointer-events: none;
+        }
+
+        .dropzone-container label.btn {
+            pointer-events: auto;
         }
 
         .dropzone-icon {
@@ -284,7 +296,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
-            max-height: 32rem;
+            max-height: 34rem;
             overflow-y: auto;
             padding-right: 0.25rem;
         }
@@ -296,7 +308,7 @@
             font-style: normal;
         }
 
-        /* Bố cục thẻ ảnh chống đè chữ & phóng to thumbnail */
+        /* BỐ CỤC THẺ ẢNH MỚI: TÁCH TÊN FILE THÀNH 1 HÀNG RIÊNG */
         .image-item-card {
             display: flex;
             flex-direction: column;
@@ -310,22 +322,13 @@
         .image-item-body {
             display: flex;
             gap: 0.75rem;
-            align-items: center;
+            align-items: flex-start;
             min-width: 0;
         }
 
-        .image-index {
-            font-weight: bold;
-            font-size: 1rem;
-            width: 1.5rem;
-            text-align: center;
-            color: var(--color-primary);
-            flex-shrink: 0;
-        }
-
         .image-thumbnail-box {
-            width: 5.5rem;
-            height: 5.5rem;
+            width: 6.5rem;
+            height: 6.5rem;
             background-color: var(--color-panel);
             display: flex;
             align-items: center;
@@ -334,6 +337,14 @@
             border: 2px solid var(--color-border);
             border-radius: 0.5rem;
             flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .image-thumbnail-box:hover {
+            border-color: var(--color-primary);
+            transform: scale(1.02);
         }
 
         .image-thumbnail-box img {
@@ -341,6 +352,25 @@
             height: 100%;
             object-fit: contain;
             display: block;
+        }
+
+        .thumbnail-zoom-hint {
+            position: absolute;
+            bottom: 0.2rem;
+            right: 0.2rem;
+            background-color: rgba(0, 0, 0, 0.65);
+            border-radius: 0.25rem;
+            padding: 0.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .thumbnail-zoom-hint svg {
+            width: 0.9rem;
+            height: 0.9rem;
+            fill: var(--color-white);
         }
 
         .image-info-box {
@@ -352,6 +382,35 @@
             flex: 1;
         }
 
+        /* Dòng 1: Huy hiệu số trang + Huy hiệu khổ xoay */
+        .image-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-page-index {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .badge-orientation {
+            background-color: var(--color-panel);
+            color: var(--color-white);
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        /* Dòng 2: Tên file chiếm trọn 100% chiều ngang */
         .image-name {
             font-weight: bold;
             font-size: 0.95rem;
@@ -359,19 +418,21 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            width: 100%;
         }
 
+        /* Dòng 3: Thông số kỹ thuật */
         .image-specs {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.4rem;
+            gap: 0.35rem;
             font-size: 0.85rem;
             color: var(--color-panel);
         }
 
         .badge-dim {
             display: inline-block;
-            padding: 0.15rem 0.4rem;
+            padding: 0.1rem 0.35rem;
             background-color: #262626;
             color: var(--color-white);
             font-size: 0.8rem;
@@ -421,6 +482,124 @@
             flex-shrink: 0;
         }
 
+        /* GIAO DIỆN MODAL PHÓNG TO TOÀN MÀN HÌNH */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.94);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--color-dark);
+            border-bottom: 2px solid var(--color-panel);
+            color: var(--color-white);
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .modal-title-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .modal-image-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal-zoom-badge {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .modal-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .btn-modal {
+            background-color: var(--color-panel);
+            color: var(--color-white);
+            border: 2px solid var(--color-border);
+            border-radius: 0.35rem;
+            padding: 0.35rem 0.6rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-modal:hover {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .btn-modal-close {
+            background-color: var(--color-danger);
+            border-color: var(--color-danger);
+        }
+
+        .btn-modal-close:hover {
+            background-color: #d61533;
+            border-color: #d61533;
+        }
+
+        .btn-modal svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            fill: currentColor;
+        }
+
+        .modal-viewport {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .modal-viewport.is-dragging {
+            cursor: grabbing;
+        }
+
+        .modal-image {
+            max-width: 90vw;
+            max-height: 80vh;
+            object-fit: contain;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+            will-change: transform;
+        }
+
         .hidden {
             display: none;
         }
@@ -439,7 +618,6 @@
         <div class="dropzone-text-main">Kéo thả các tập tin ảnh vào đây hoặc dán ảnh (Ctrl + V)</div>
         <div class="dropzone-text-sub">Hỗ trợ tự động chuẩn hoá góc xoay: JPG, PNG, WEBP, HEIC, BMP</div>
         
-        <!-- Thẻ LABEL kích hoạt bộ chọn ảnh cấp phần cứng trên điện thoại -->
         <label for="file-input" class="btn btn-primary" id="btn-browse">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             Chọn ảnh từ thiết bị
@@ -461,7 +639,7 @@
         </div>
         <div class="action-bar-right">
             <button type="button" class="btn btn-success" id="btn-export-pdf">
-                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
                 Tạo và tải file PDF
             </button>
         </div>
@@ -484,11 +662,36 @@
         </div>
     </div>
 
+    <!-- CỬA SỔ XEM ẢNH TOÀN MÀN HÌNH (MODAL VIEWER) -->
+    <div id="modal-viewer" class="modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <div class="modal-title-box">
+                <span id="modal-image-name" class="modal-image-name">Tên ảnh</span>
+                <span id="modal-zoom-level" class="modal-zoom-badge">100%</span>
+            </div>
+            <div class="modal-controls">
+                <button type="button" class="btn-modal" id="btn-zoom-out" title="Thu nhỏ (-)">
+                    <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+                </button>
+                <button type="button" class="btn-modal" id="btn-zoom-reset" title="Tỉ lệ gốc 100%">1:1</button>
+                <button type="button" class="btn-modal" id="btn-zoom-in" title="Phóng to (+)">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </button>
+                <button type="button" class="btn-modal btn-modal-close" id="btn-modal-close" title="Đóng (Esc)">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="modal-viewport" id="modal-viewport">
+            <img id="modal-image" class="modal-image" src="" alt="Xem trước chi tiết">
+        </div>
+    </div>
+
     <script>
         // Mảng chứa danh sách ảnh
         let imageItems = [];
 
-        // Tham chiếu DOM
+        // Tham chiếu DOM chính
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const btnClearAll = document.getElementById('btn-clear-all');
@@ -500,7 +703,29 @@
         const statusBox = document.getElementById('status-box');
         const statusText = document.getElementById('status-text');
 
-        // Cập nhật trạng thái
+        // Tham chiếu DOM Modal Viewer
+        const modalViewer = document.getElementById('modal-viewer');
+        const modalImage = document.getElementById('modal-image');
+        const modalImageName = document.getElementById('modal-image-name');
+        const modalZoomLevel = document.getElementById('modal-zoom-level');
+        const modalViewport = document.getElementById('modal-viewport');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const btnZoomReset = document.getElementById('btn-zoom-reset');
+        const btnModalClose = document.getElementById('btn-modal-close');
+
+        // Trạng thái Zoom & Pan của Modal
+        let currentZoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialPinchDistance = 0;
+        let initialZoomOnPinch = 1;
+        let lastTapTime = 0;
+
+        // Cập nhật thông báo trạng thái
         function updateStatus(message, type = 'info') {
             statusText.textContent = message;
             statusBox.className = 'status-box ' + type;
@@ -585,7 +810,7 @@
             reader.readAsDataURL(file);
         }
 
-        // Xử lý nạp danh sách tập tin
+        // Nạp danh sách tập tin
         async function handleIncomingFiles(fileList) {
             const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
             if (files.length === 0) {
@@ -621,7 +846,7 @@
             updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
         }
 
-        // Vẽ lại danh sách giao diện dạng thẻ Card chống đè chữ
+        // Vẽ lại danh sách giao diện chuẩn phân cấp 3 dòng
         function renderImageList() {
             totalCountEl.textContent = imageItems.length.toLocaleString('vi-VN');
 
@@ -643,16 +868,24 @@
 
                 card.innerHTML = `
                     <div class="image-item-body">
-                        <div class="image-index">${index + 1}</div>
-                        <div class="image-thumbnail-box">
+                        <div class="image-thumbnail-box" title="Bấm vào để phóng to ảnh">
                             <img src="${item.dataUrl}" alt="${item.name}">
+                            <div class="thumbnail-zoom-hint">
+                                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
+                            </div>
                         </div>
                         <div class="image-info-box">
+                            <!-- Dòng 1: Huy hiệu số trang & khổ xoay -->
+                            <div class="image-tag-row">
+                                <span class="badge-page-index">Trang ${index + 1}</span>
+                                <span class="badge-orientation">${orientationText}</span>
+                            </div>
+                            <!-- Dòng 2: Tên file chiếm trọn 100% chiều ngang -->
                             <div class="image-name" title="${item.name}">${item.name}</div>
+                            <!-- Dòng 3: Thông số kích thước & dung lượng -->
                             <div class="image-specs">
                                 <span class="badge-dim">${item.width} × ${item.height} px</span>
                                 <span>${item.sizeFormatted}</span>
-                                <span>${orientationText}</span>
                             </div>
                         </div>
                     </div>
@@ -671,6 +904,12 @@
                         </button>
                     </div>
                 `;
+
+                // Bấm vào Thumbnail để mở Modal xem ảnh phóng to
+                const thumbBox = card.querySelector('.image-thumbnail-box');
+                thumbBox.addEventListener('click', () => {
+                    openImageViewer(item);
+                });
 
                 const btnUp = card.querySelector('.btn-move-up');
                 const btnDown = card.querySelector('.btn-move-down');
@@ -704,7 +943,135 @@
             });
         }
 
-        // Lắng nghe chọn file trực tiếp từ input
+        // ==========================================
+        // XỬ LÝ MODAL PHÓNG TO & KÉO DI CHUYỂN ẢNH
+        // ==========================================
+        function updateTransform() {
+            const maxPan = 400 * currentZoom;
+            panX = Math.max(-maxPan, Math.min(maxPan, panX));
+            panY = Math.max(-maxPan, Math.min(maxPan, panY));
+
+            modalImage.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+            modalZoomLevel.textContent = Math.round(currentZoom * 100) + '%';
+        }
+
+        function setZoom(newZoom) {
+            currentZoom = Math.min(Math.max(newZoom, 0.5), 4.0);
+            if (currentZoom <= 1) {
+                panX = 0;
+                panY = 0;
+            }
+            updateTransform();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        }
+
+        function openImageViewer(item) {
+            modalImage.src = item.dataUrl;
+            modalImageName.textContent = item.name + ` (${item.width}×${item.height} px)`;
+            resetZoom();
+            document.body.classList.add('modal-open');
+            modalViewer.classList.remove('hidden');
+        }
+
+        function closeImageViewer() {
+            modalViewer.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            modalImage.src = '';
+        }
+
+        btnModalClose.addEventListener('click', closeImageViewer);
+        btnZoomIn.addEventListener('click', () => setZoom(currentZoom + 0.25));
+        btnZoomOut.addEventListener('click', () => setZoom(currentZoom - 0.25));
+        btnZoomReset.addEventListener('click', resetZoom);
+
+        // Đóng khi bấm phím Escape
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modalViewer.classList.contains('hidden')) {
+                closeImageViewer();
+            }
+        });
+
+        // Zoom bằng con lăn chuột (Mouse Wheel)
+        modalViewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomDelta = e.deltaY < 0 ? 0.2 : -0.2;
+            setZoom(currentZoom + zoomDelta);
+        }, { passive: false });
+
+        // Kéo di chuyển ảnh bằng Chuột (Mouse Drag Pan)
+        modalViewport.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.modal-controls')) return;
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            modalViewport.classList.add('is-dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            modalViewport.classList.remove('is-dragging');
+        });
+
+        // Hỗ trợ cảm ứng điện thoại (Touch Drag & Pinch Zoom & Double Tap)
+        modalViewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                const now = Date.now();
+                if (now - lastTapTime < 300) {
+                    setZoom(currentZoom > 1 ? 1 : 2);
+                }
+                lastTapTime = now;
+
+                isDragging = true;
+                startX = e.touches[0].clientX - panX;
+                startY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+                initialZoomOnPinch = currentZoom;
+            }
+        }, { passive: true });
+
+        modalViewport.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                panX = e.touches[0].clientX - startX;
+                panY = e.touches[0].clientY - startY;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const currentDistance = Math.sqrt(dx * dx + dy * dy);
+                if (initialPinchDistance > 0) {
+                    const scaleFactor = currentDistance / initialPinchDistance;
+                    setZoom(initialZoomOnPinch * scaleFactor);
+                }
+            }
+        }, { passive: true });
+
+        modalViewport.addEventListener('touchend', (e) => {
+            isDragging = false;
+            if (e.touches.length < 2) {
+                initialPinchDistance = 0;
+            }
+        });
+
+        // ==========================================
+        // CÁC SỰ KIỆN NẠP FILE & XUẤT PDF
+        // ==========================================
         fileInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files.length > 0) {
                 handleIncomingFiles(e.target.files);
@@ -712,7 +1079,6 @@
             }
         });
 
-        // Xử lý kéo thả (Drag & Drop)
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -734,7 +1100,6 @@
             }
         });
 
-        // Dán ảnh từ Clipboard (Ctrl + V)
         window.addEventListener('paste', (e) => {
             const clipboardData = e.clipboardData || window.clipboardData;
             if (!clipboardData || !clipboardData.items) return;
@@ -755,7 +1120,6 @@
             }
         });
 
-        // Nút xoá tất cả
         btnClearAll.addEventListener('click', () => {
             if (imageItems.length === 0) return;
             if (confirm('Bạn có chắc chắn muốn xoá toàn bộ danh sách ảnh không?')) {
@@ -765,7 +1129,6 @@
             }
         });
 
-        // Nút đảo thứ tự
         btnReverseOrder.addEventListener('click', () => {
             if (imageItems.length <= 1) return;
             imageItems.reverse();
@@ -773,7 +1136,6 @@
             updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
         });
 
-        // Nút xuất file PDF chuẩn xác từng điểm ảnh
         btnExportPdf.addEventListener('click', async () => {
             if (imageItems.length === 0) {
                 alert('Vui lòng thêm ít nhất một hình ảnh vào danh sách trước khi xuất PDF!');
@@ -824,7 +1186,7 @@
                     doc.addImage(current.dataUrl, 'JPEG', 0, 0, pWidth, pHeight);
                 }
 
-                // Đặt tên file theo đúng chuẩn yêu cầu: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
+                // Tên file chuẩn: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
                 const now = new Date();
                 const YYYY = now.getFullYear().toString();
                 const MM = String(now.getMonth() + 1).padStart(2, '0');
