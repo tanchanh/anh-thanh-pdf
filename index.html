@@ -308,7 +308,7 @@
             font-style: normal;
         }
 
-        /* BỐ CỤC THẺ ẢNH MỚI: TÁCH TÊN FILE THÀNH 1 HÀNG RIÊNG */
+        /* BỐ CỤC THẺ ẢNH DANH SÁCH */
         .image-item-card {
             display: flex;
             flex-direction: column;
@@ -382,7 +382,6 @@
             flex: 1;
         }
 
-        /* Dòng 1: Huy hiệu số trang + Huy hiệu khổ xoay */
         .image-tag-row {
             display: flex;
             align-items: center;
@@ -410,7 +409,6 @@
             flex-shrink: 0;
         }
 
-        /* Dòng 2: Tên file chiếm trọn 100% chiều ngang */
         .image-name {
             font-weight: bold;
             font-size: 0.95rem;
@@ -421,7 +419,6 @@
             width: 100%;
         }
 
-        /* Dòng 3: Thông số kỹ thuật */
         .image-specs {
             display: flex;
             flex-wrap: wrap;
@@ -482,67 +479,121 @@
             flex-shrink: 0;
         }
 
-        /* GIAO DIỆN MODAL PHÓNG TO TOÀN MÀN HÌNH */
+        /* GIAO DIỆN MODAL PHỦ NỔI VÔ CỰC 100% (TRUE FLOATING OVERLAY) */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.94);
+            background-color: rgba(0, 0, 0, 0.96);
             z-index: 9999;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             user-select: none;
+            overflow: hidden;
         }
 
-        .modal-header {
+        /* KHUNG XEM ẢNH CHIẾM TRỌN 100% TOÀN MÀN HÌNH TỪ NÓC XUỐNG ĐÁY */
+        .modal-viewport {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: var(--color-dark);
-            border-bottom: 2px solid var(--color-panel);
-            color: var(--color-white);
-            gap: 0.5rem;
+            justify-content: center;
+            touch-action: none;
+            cursor: grab;
             z-index: 10;
         }
 
-        .modal-title-box {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            overflow: hidden;
-            min-width: 0;
+        .modal-viewport.is-dragging {
+            cursor: grabbing;
         }
 
-        .modal-image-name {
-            font-weight: bold;
-            font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .modal-image {
+            max-width: 100vw;
+            max-height: 100vh;
+            object-fit: contain;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+            will-change: transform;
         }
 
-        .modal-zoom-badge {
-            background-color: var(--color-primary);
+        /* NÚT MŨI TÊN ĐIỀU HƯỚNG TRÁI / PHẢI */
+        .btn-modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: rgba(26, 26, 26, 0.75);
+            border: 2px solid var(--color-border);
             color: var(--color-white);
-            padding: 0.1rem 0.4rem;
-            border-radius: 0.25rem;
-            font-size: 0.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .modal-controls {
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            flex-shrink: 0;
+            justify-content: center;
+            z-index: 20;
+            transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+        }
+
+        .btn-modal-nav:hover:not(:disabled) {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .btn-modal-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-modal-nav svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: currentColor;
+        }
+
+        .btn-nav-prev {
+            left: 0.75rem;
+        }
+
+        .btn-nav-next {
+            right: 0.75rem;
+        }
+
+        /* THANH ĐỈNH NỔI TRỰC TIẾP LÊN ĐỈNH ẢNH (TRONG SUỐT HOÀN TOÀN) */
+        .modal-top-bar {
+            position: absolute;
+            top: 0.6rem;
+            left: 0.6rem;
+            right: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .modal-top-bar > * {
+            pointer-events: auto;
+        }
+
+        .modal-controls-group {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
         }
 
         .btn-modal {
-            background-color: var(--color-panel);
+            background-color: rgba(26, 26, 26, 0.85);
             color: var(--color-white);
             border: 2px solid var(--color-border);
-            border-radius: 0.35rem;
+            border-radius: 0.4rem;
             padding: 0.35rem 0.6rem;
             font-size: 0.85rem;
             font-weight: bold;
@@ -574,34 +625,84 @@
             fill: currentColor;
         }
 
-        .modal-viewport {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
+        /* THANH ĐÁY NỔI TRỰC TIẾP LÊN ĐÁY ẢNH (TRONG SUỐT HOÀN TOÀN) */
+        .modal-bottom-bar {
+            position: absolute;
+            bottom: 0.6rem;
+            left: 0.6rem;
+            right: 0.6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .modal-footer-content {
+            pointer-events: auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            touch-action: none;
-            cursor: grab;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            max-width: 38rem;
+            width: 100%;
+            text-align: center;
         }
 
-        .modal-viewport.is-dragging {
-            cursor: grabbing;
+        .modal-pill-name {
+            background-color: rgba(26, 26, 26, 0.85);
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--color-white);
+            max-width: 22rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .modal-image {
-            max-width: 90vw;
-            max-height: 80vh;
-            object-fit: contain;
-            transform-origin: center center;
-            user-select: none;
-            -webkit-user-drag: none;
-            pointer-events: none;
-            will-change: transform;
+        .modal-pill-specs {
+            background-color: rgba(26, 26, 26, 0.85);
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--color-white);
+            flex-shrink: 0;
         }
 
         .hidden {
             display: none;
+        }
+
+        /* TỐI ƯU MÀN HÌNH NHỎ ĐIỆN THOẠI */
+        @media (max-width: 480px) {
+            .btn-modal-nav {
+                width: 2.3rem;
+                height: 2.3rem;
+            }
+            .btn-nav-prev {
+                left: 0.25rem;
+            }
+            .btn-nav-next {
+                right: 0.25rem;
+            }
+            .btn-zoom-desktop {
+                display: none;
+            }
+            .modal-pill-name {
+                max-width: 18rem;
+            }
+            .modal-top-bar, .modal-bottom-bar {
+                top: 0.4rem;
+                bottom: 0.4rem;
+                left: 0.4rem;
+                right: 0.4rem;
+            }
         }
     </style>
 </head>
@@ -662,18 +763,29 @@
         </div>
     </div>
 
-    <!-- CỬA SỔ XEM ẢNH TOÀN MÀN HÌNH (MODAL VIEWER) -->
+    <!-- CỬA SỔ XEM ẢNH TOÀN MÀN HÌNH NỔI VÔ CỰC (TRUE FLOATING OVERLAY) -->
     <div id="modal-viewer" class="modal-overlay hidden" role="dialog" aria-modal="true">
-        <div class="modal-header">
-            <div class="modal-title-box">
-                <span id="modal-image-name" class="modal-image-name">Tên ảnh</span>
-                <span id="modal-zoom-level" class="modal-zoom-badge">100%</span>
-            </div>
-            <div class="modal-controls">
+        <!-- 1. KHUNG ẢNH TRUNG TÂM BUNG TO 100% TOÀN MÀN HÌNH -->
+        <div class="modal-viewport" id="modal-viewport">
+            <button type="button" class="btn-modal-nav btn-nav-prev" id="btn-modal-prev" title="Ảnh trước (Mũi tên Trái)">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+
+            <img id="modal-image" class="modal-image" src="" alt="Xem trước chi tiết">
+
+            <button type="button" class="btn-modal-nav btn-nav-next" id="btn-modal-next" title="Ảnh sau (Mũi tên Phải)">
+                <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+        </div>
+
+        <!-- 2. THANH ĐỈNH NỔI TRỰC TIẾP LÊN ĐỈNH ẢNH (TRONG SUỐT) -->
+        <div class="modal-top-bar">
+            <span id="modal-page-badge" class="badge-page-index">Trang 1/1</span>
+            <div class="modal-controls-group">
+                <button type="button" class="btn-modal btn-zoom-desktop" id="btn-zoom-reset" title="Tỉ lệ gốc 100%">1:1</button>
                 <button type="button" class="btn-modal" id="btn-zoom-out" title="Thu nhỏ (-)">
                     <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
                 </button>
-                <button type="button" class="btn-modal" id="btn-zoom-reset" title="Tỉ lệ gốc 100%">1:1</button>
                 <button type="button" class="btn-modal" id="btn-zoom-in" title="Phóng to (+)">
                     <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </button>
@@ -682,8 +794,15 @@
                 </button>
             </div>
         </div>
-        <div class="modal-viewport" id="modal-viewport">
-            <img id="modal-image" class="modal-image" src="" alt="Xem trước chi tiết">
+
+        <!-- 3. THANH ĐÁY NỔI TRỰC TIẾP LÊN ĐÁY ẢNH (TRONG SUỐT) -->
+        <div class="modal-bottom-bar">
+            <div class="modal-footer-content">
+                <!-- Tên ảnh nằm trước -->
+                <span id="modal-image-name" class="modal-pill-name" title="tên_ảnh.jpg">tên_ảnh.jpg</span>
+                <!-- Kích thước ảnh nằm sau -->
+                <span id="modal-image-specs" class="modal-pill-specs">1024 × 1024 px</span>
+            </div>
         </div>
     </div>
 
@@ -706,21 +825,26 @@
         // Tham chiếu DOM Modal Viewer
         const modalViewer = document.getElementById('modal-viewer');
         const modalImage = document.getElementById('modal-image');
+        const modalPageBadge = document.getElementById('modal-page-badge');
         const modalImageName = document.getElementById('modal-image-name');
-        const modalZoomLevel = document.getElementById('modal-zoom-level');
+        const modalImageSpecs = document.getElementById('modal-image-specs');
         const modalViewport = document.getElementById('modal-viewport');
         const btnZoomIn = document.getElementById('btn-zoom-in');
         const btnZoomOut = document.getElementById('btn-zoom-out');
         const btnZoomReset = document.getElementById('btn-zoom-reset');
         const btnModalClose = document.getElementById('btn-modal-close');
+        const btnModalPrev = document.getElementById('btn-modal-prev');
+        const btnModalNext = document.getElementById('btn-modal-next');
 
-        // Trạng thái Zoom & Pan của Modal
+        // Trạng thái Modal
+        let currentModalIndex = 0;
         let currentZoom = 1;
         let panX = 0;
         let panY = 0;
         let isDragging = false;
         let startX = 0;
         let startY = 0;
+        let hasMoved = false;
         let initialPinchDistance = 0;
         let initialZoomOnPinch = 1;
         let lastTapTime = 0;
@@ -846,7 +970,7 @@
             updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
         }
 
-        // Vẽ lại danh sách giao diện chuẩn phân cấp 3 dòng
+        // Vẽ lại danh sách giao diện
         function renderImageList() {
             totalCountEl.textContent = imageItems.length.toLocaleString('vi-VN');
 
@@ -875,14 +999,11 @@
                             </div>
                         </div>
                         <div class="image-info-box">
-                            <!-- Dòng 1: Huy hiệu số trang & khổ xoay -->
                             <div class="image-tag-row">
                                 <span class="badge-page-index">Trang ${index + 1}</span>
                                 <span class="badge-orientation">${orientationText}</span>
                             </div>
-                            <!-- Dòng 2: Tên file chiếm trọn 100% chiều ngang -->
                             <div class="image-name" title="${item.name}">${item.name}</div>
-                            <!-- Dòng 3: Thông số kích thước & dung lượng -->
                             <div class="image-specs">
                                 <span class="badge-dim">${item.width} × ${item.height} px</span>
                                 <span>${item.sizeFormatted}</span>
@@ -905,10 +1026,10 @@
                     </div>
                 `;
 
-                // Bấm vào Thumbnail để mở Modal xem ảnh phóng to
+                // Bấm vào Thumbnail để mở Modal xem ảnh phóng to tại vị trí index
                 const thumbBox = card.querySelector('.image-thumbnail-box');
                 thumbBox.addEventListener('click', () => {
-                    openImageViewer(item);
+                    openImageViewer(index);
                 });
 
                 const btnUp = card.querySelector('.btn-move-up');
@@ -943,16 +1064,15 @@
             });
         }
 
-        // ==========================================
-        // XỬ LÝ MODAL PHÓNG TO & KÉO DI CHUYỂN ẢNH
-        // ==========================================
+        // ==========================================================
+        // XỬ LÝ MODAL PHỦ NỔI VÔ CỰC 100%
+        // ==========================================================
         function updateTransform() {
             const maxPan = 400 * currentZoom;
             panX = Math.max(-maxPan, Math.min(maxPan, panX));
             panY = Math.max(-maxPan, Math.min(maxPan, panY));
 
             modalImage.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
-            modalZoomLevel.textContent = Math.round(currentZoom * 100) + '%';
         }
 
         function setZoom(newZoom) {
@@ -971,9 +1091,26 @@
             updateTransform();
         }
 
-        function openImageViewer(item) {
+        function renderModalContent() {
+            if (imageItems.length === 0 || currentModalIndex < 0 || currentModalIndex >= imageItems.length) {
+                closeImageViewer();
+                return;
+            }
+
+            const item = imageItems[currentModalIndex];
             modalImage.src = item.dataUrl;
-            modalImageName.textContent = item.name + ` (${item.width}×${item.height} px)`;
+            modalPageBadge.textContent = `Trang ${currentModalIndex + 1}/${imageItems.length}`;
+            modalImageName.textContent = item.name;
+            modalImageName.title = item.name;
+            modalImageSpecs.textContent = `${item.width} × ${item.height} px`;
+
+            btnModalPrev.disabled = (currentModalIndex === 0);
+            btnModalNext.disabled = (currentModalIndex === imageItems.length - 1);
+        }
+
+        function openImageViewer(index) {
+            currentModalIndex = index;
+            renderModalContent();
             resetZoom();
             document.body.classList.add('modal-open');
             modalViewer.classList.remove('hidden');
@@ -985,15 +1122,48 @@
             modalImage.src = '';
         }
 
+        function showPrevImage() {
+            if (currentModalIndex > 0) {
+                currentModalIndex--;
+                renderModalContent();
+                resetZoom();
+            }
+        }
+
+        function showNextImage() {
+            if (currentModalIndex < imageItems.length - 1) {
+                currentModalIndex++;
+                renderModalContent();
+                resetZoom();
+            }
+        }
+
         btnModalClose.addEventListener('click', closeImageViewer);
+        btnModalPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPrevImage();
+        });
+        btnModalNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showNextImage();
+        });
+
         btnZoomIn.addEventListener('click', () => setZoom(currentZoom + 0.25));
         btnZoomOut.addEventListener('click', () => setZoom(currentZoom - 0.25));
-        btnZoomReset.addEventListener('click', resetZoom);
+        if (btnZoomReset) {
+            btnZoomReset.addEventListener('click', resetZoom);
+        }
 
-        // Đóng khi bấm phím Escape
+        // Phím tắt bàn phím
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modalViewer.classList.contains('hidden')) {
+            if (modalViewer.classList.contains('hidden')) return;
+
+            if (e.key === 'Escape') {
                 closeImageViewer();
+            } else if (e.key === 'ArrowLeft') {
+                showPrevImage();
+            } else if (e.key === 'ArrowRight') {
+                showNextImage();
             }
         });
 
@@ -1006,8 +1176,9 @@
 
         // Kéo di chuyển ảnh bằng Chuột (Mouse Drag Pan)
         modalViewport.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.modal-controls')) return;
+            if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar') || e.target.closest('.modal-bottom-bar')) return;
             isDragging = true;
+            hasMoved = false;
             startX = e.clientX - panX;
             startY = e.clientY - panY;
             modalViewport.classList.add('is-dragging');
@@ -1015,18 +1186,36 @@
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            panX = e.clientX - startX;
-            panY = e.clientY - startY;
+            const newPanX = e.clientX - startX;
+            const newPanY = e.clientY - startY;
+            if (Math.abs(newPanX - panX) > 4 || Math.abs(newPanY - panY) > 4) {
+                hasMoved = true;
+            }
+            panX = newPanX;
+            panY = newPanY;
             updateTransform();
         });
 
-        window.addEventListener('mouseup', () => {
+        window.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
             isDragging = false;
             modalViewport.classList.remove('is-dragging');
+
+            if (!hasMoved && currentZoom === 1 && !e.target.closest('.btn-modal-nav') && !e.target.closest('.modal-top-bar') && !e.target.closest('.modal-bottom-bar')) {
+                const rect = modalViewport.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                if (clickX < rect.width * 0.35) {
+                    showPrevImage();
+                } else if (clickX > rect.width * 0.65) {
+                    showNextImage();
+                }
+            }
         });
 
-        // Hỗ trợ cảm ứng điện thoại (Touch Drag & Pinch Zoom & Double Tap)
+        // Cảm ứng điện thoại (Touch Drag & Pinch Zoom & Chạm chuyển ảnh)
         modalViewport.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar') || e.target.closest('.modal-bottom-bar')) return;
+
             if (e.touches.length === 1) {
                 const now = Date.now();
                 if (now - lastTapTime < 300) {
@@ -1035,6 +1224,7 @@
                 lastTapTime = now;
 
                 isDragging = true;
+                hasMoved = false;
                 startX = e.touches[0].clientX - panX;
                 startY = e.touches[0].clientY - panY;
             } else if (e.touches.length === 2) {
@@ -1048,8 +1238,13 @@
 
         modalViewport.addEventListener('touchmove', (e) => {
             if (e.touches.length === 1 && isDragging) {
-                panX = e.touches[0].clientX - startX;
-                panY = e.touches[0].clientY - startY;
+                const newPanX = e.touches[0].clientX - startX;
+                const newPanY = e.touches[0].clientY - startY;
+                if (Math.abs(newPanX - panX) > 6 || Math.abs(newPanY - panY) > 6) {
+                    hasMoved = true;
+                }
+                panX = newPanX;
+                panY = newPanY;
                 updateTransform();
             } else if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -1063,6 +1258,19 @@
         }, { passive: true });
 
         modalViewport.addEventListener('touchend', (e) => {
+            if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar') || e.target.closest('.modal-bottom-bar')) return;
+
+            if (!hasMoved && currentZoom === 1 && e.changedTouches.length === 1) {
+                const touch = e.changedTouches[0];
+                const rect = modalViewport.getBoundingClientRect();
+                const touchX = touch.clientX - rect.left;
+                if (touchX < rect.width * 0.35) {
+                    showPrevImage();
+                } else if (touchX > rect.width * 0.65) {
+                    showNextImage();
+                }
+            }
+
             isDragging = false;
             if (e.touches.length < 2) {
                 initialPinchDistance = 0;
