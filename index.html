@@ -459,7 +459,7 @@
             flex-shrink: 0;
         }
 
-        /* MODAL VIEWER: GRID 100DVH (KHÔNG ĐÈ NÚT) */
+        /* MODAL VIEWER: GRID 100DVH (ĐÃ DÃN KHOẢNG CÁCH NÚT VÀ THÊM NÚT VỪA MÀN HÌNH) */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -479,14 +479,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.35rem 0.75rem;
+            padding: 0.4rem 0.75rem;
             z-index: 20;
         }
 
+        /* DÃN RỘNG KHOẢNG CÁCH NÚT */
         .modal-controls-group {
             display: flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.6rem;
         }
 
         .btn-modal {
@@ -512,6 +513,7 @@
         .btn-modal-close {
             background-color: var(--color-danger);
             border-color: var(--color-danger);
+            margin-left: 0.4rem; /* Khoảng cách riêng biệt cho nút đóng */
         }
 
         .btn-modal-close:hover {
@@ -657,8 +659,11 @@
             .btn-nav-next {
                 right: 0.25rem;
             }
-            .btn-zoom-desktop {
-                display: none;
+            .modal-controls-group {
+                gap: 0.4rem;
+            }
+            .btn-modal-close {
+                margin-left: 0.2rem;
             }
             .modal-pill-name {
                 max-width: 16rem;
@@ -700,7 +705,7 @@
         </div>
         <div class="action-bar-right">
             <button type="button" class="btn btn-success" id="btn-export-pdf">
-                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
                 Tạo và tải file PDF
             </button>
         </div>
@@ -725,17 +730,23 @@
 
     <!-- CỬA SỔ XEM ẢNH TOÀN MÀN HÌNH (MODAL VIEWER) -->
     <div id="modal-viewer" class="modal-overlay hidden" role="dialog" aria-modal="true">
-        <!-- HÀNG 1: NÓC (TRONG SUỐT) -->
+        <!-- HÀNG 1: NÓC (NÚT BẤM DÃN KHOẢNG CÁCH RỘNG RÃI & NÚT VỪA MÀN HÌNH) -->
         <div class="modal-top-bar">
             <span id="modal-page-badge" class="badge-page-index">Trang 1/1</span>
             <div class="modal-controls-group">
-                <button type="button" class="btn-modal btn-zoom-desktop" id="btn-zoom-reset" title="Tỉ lệ gốc 100%">1:1</button>
+                <!-- 1. Nút Thu nhỏ (-) -->
                 <button type="button" class="btn-modal" id="btn-zoom-out" title="Thu nhỏ (-)">
                     <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
                 </button>
+                <!-- 2. Nút Vừa màn hình (Fit Screen) ở chính giữa -->
+                <button type="button" class="btn-modal" id="btn-zoom-fit" title="Vừa màn hình (1:1)">
+                    <svg viewBox="0 0 24 24"><path d="M5 15H3v4c0 1.1.9 2 2 2h4v-2H5v-4zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </button>
+                <!-- 3. Nút Phóng to (+) -->
                 <button type="button" class="btn-modal" id="btn-zoom-in" title="Phóng to (+)">
                     <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </button>
+                <!-- 4. Nút Đóng (Tách riêng an toàn) -->
                 <button type="button" class="btn-modal btn-modal-close" id="btn-modal-close" title="Đóng (Esc)">
                     <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
                 </button>
@@ -789,7 +800,7 @@
         const modalViewport = document.getElementById('modal-viewport');
         const btnZoomIn = document.getElementById('btn-zoom-in');
         const btnZoomOut = document.getElementById('btn-zoom-out');
-        const btnZoomReset = document.getElementById('btn-zoom-reset');
+        const btnZoomFit = document.getElementById('btn-zoom-fit');
         const btnModalClose = document.getElementById('btn-modal-close');
         const btnModalPrev = document.getElementById('btn-modal-prev');
         const btnModalNext = document.getElementById('btn-modal-next');
@@ -1021,7 +1032,7 @@
         }
 
         // ==========================================================
-        // XỬ LÝ MODAL PHÓNG TO GRID 100DVH (ĐÃ KHÓA 1 LẦN CHẠM = 1 TRANG)
+        // XỬ LÝ MODAL PHÓNG TO & NÚT VỪA MÀN HÌNH
         // ==========================================================
         function updateTransform() {
             const maxPan = 400 * currentZoom;
@@ -1105,7 +1116,7 @@
 
         btnZoomIn.addEventListener('click', () => setZoom(currentZoom + 0.25));
         btnZoomOut.addEventListener('click', () => setZoom(currentZoom - 0.25));
-        btnZoomReset.addEventListener('click', resetZoom);
+        btnZoomFit.addEventListener('click', resetZoom); // Nút Vừa màn hình (1:1)
 
         // Phím tắt bàn phím
         window.addEventListener('keydown', (e) => {
@@ -1212,7 +1223,7 @@
 
             // Xử lý chuyển đúng 1 trang duy nhất khi chạm tay
             if (!hasMoved && currentZoom === 1 && e.changedTouches.length === 1) {
-                lastTouchEndTime = Date.now(); // Khóa chống chuột ảo phát sinh
+                lastTouchEndTime = Date.now();
                 const touch = e.changedTouches[0];
                 const rect = modalViewport.getBoundingClientRect();
                 const touchX = touch.clientX - rect.left;
