@@ -459,7 +459,7 @@
             flex-shrink: 0;
         }
 
-        /* MODAL VIEWER: GRID 100DVH (ĐÃ DÃN KHOẢNG CÁCH NÚT VÀ THÊM NÚT VỪA MÀN HÌNH) */
+        /* MODAL VIEWER: GRID 100DVH (BẤT BIẾN, DÃN KHOẢNG CÁCH NÚT) */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -483,7 +483,6 @@
             z-index: 20;
         }
 
-        /* DÃN RỘNG KHOẢNG CÁCH NÚT */
         .modal-controls-group {
             display: flex;
             align-items: center;
@@ -513,7 +512,7 @@
         .btn-modal-close {
             background-color: var(--color-danger);
             border-color: var(--color-danger);
-            margin-left: 0.4rem; /* Khoảng cách riêng biệt cho nút đóng */
+            margin-left: 0.4rem;
         }
 
         .btn-modal-close:hover {
@@ -816,7 +815,7 @@
         let hasMoved = false;
         let initialPinchDistance = 0;
         let initialZoomOnPinch = 1;
-        let lastTouchEndTime = 0; // Biến khóa chống kích hoạt kép trên điện thoại
+        let lastTouchEndTime = 0; // Khóa chống chuột ảo phát sinh
 
         // Cập nhật thông báo trạng thái
         function updateStatus(message, type = 'info') {
@@ -843,68 +842,53 @@
             return formatted.toLocaleString('vi-VN') + ' ' + sizes[i];
         }
 
-        // Chuẩn hoá ảnh qua Canvas (Khử góc xoay EXIF, thu dọn RAM tức thì)
-        function renderToCleanCanvas(file) {
-            return new Promise((resolve, reject) => {
-                if (!file.type.startsWith('image/')) {
-                    reject(new Error('Tập tin không phải là hình ảnh hợp lệ'));
-                    return;
-                }
-
-                if ('createImageBitmap' in window) {
-                    createImageBitmap(file, { imageOrientation: 'from-image' })
-                        .then((bitmap) => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = bitmap.width;
-                            canvas.height = bitmap.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(bitmap, 0, 0);
-                            const cleanDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                            bitmap.close();
-
-                            resolve({
-                                width: canvas.width,
-                                height: canvas.height,
-                                dataUrl: cleanDataUrl
-                            });
-                        })
-                        .catch(() => {
-                            fallbackWithImageElement(file, resolve, reject);
-                        });
-                } else {
-                    fallbackWithImageElement(file, resolve, reject);
-                }
+        // Fallback đọc kích thước ảnh cho trình duyệt cũ
+        function getImageDimensionsFallback(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+                img.onerror = () => resolve({ width: 800, height: 600 });
+                img.src = url;
             });
         }
 
-        // Fallback qua thẻ Image
-        function fallbackWithImageElement(file, resolve, reject) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    const cleanDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                    img.src = ''; // Thu dọn bộ nhớ
+        // ==========================================================
+        // ĐỘNG CƠ NẠP ẢNH SIÊU TỐC: ĐA LUỒNG SONG SONG + NATIVE BLOB
+        // ==========================================================
+        async function processFastImage(file) {
+            try {
+                const previewUrl = URL.createObjectURL(file);
+                let width = 0;
+                let height = 0;
 
-                    resolve({
-                        width: canvas.width,
-                        height: canvas.height,
-                        dataUrl: cleanDataUrl
-                    });
+                if ('createImageBitmap' in window) {
+                    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+                    width = bitmap.width;
+                    height = bitmap.height;
+                    bitmap.close();
+                } else {
+                    const dim = await getImageDimensionsFallback(previewUrl);
+                    width = dim.width;
+                    height = dim.height;
+                }
+
+                return {
+                    id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    file: file,
+                    name: file.name || 'anh-chup.jpg',
+                    size: file.size,
+                    sizeFormatted: formatBytes(file.size),
+                    width: width,
+                    height: height,
+                    previewUrl: previewUrl,
+                    orientation: width > height ? 'landscape' : 'portrait'
                 };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
+            } catch (err) {
+                console.error('Lỗi khi nạp ảnh:', err);
+                return null;
+            }
         }
 
-        // Nạp danh sách tập tin
         async function handleIncomingFiles(fileList) {
             const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
             if (files.length === 0) {
@@ -912,32 +896,17 @@
                 return;
             }
 
-            updateStatus(`Đang chuẩn hoá chiều xoay và kích thước ${files.length} ảnh...`, 'info');
+            updateStatus(`Đang nạp nhanh ${files.length} ảnh...`, 'info');
 
-            let successCount = 0;
-            for (const file of files) {
-                try {
-                    const normalized = await renderToCleanCanvas(file);
-                    const isLandscape = normalized.width > normalized.height;
+            // Xử lý song song tất cả các ảnh cùng một lúc
+            const promises = files.map(file => processFastImage(file));
+            const results = await Promise.all(promises);
+            const validItems = results.filter(item => item !== null);
 
-                    imageItems.push({
-                        id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                        name: file.name || 'anh-chup.jpg',
-                        size: file.size,
-                        sizeFormatted: formatBytes(file.size),
-                        width: normalized.width,
-                        height: normalized.height,
-                        dataUrl: normalized.dataUrl,
-                        orientation: isLandscape ? 'landscape' : 'portrait'
-                    });
-                    successCount++;
-                } catch (err) {
-                    console.error('Lỗi khi nạp ảnh:', err);
-                }
-            }
+            imageItems.push(...validItems);
 
             renderImageList();
-            updateStatus(`Đã nạp thành công ${successCount} ảnh. Sẵn sàng tạo file PDF.`, 'success');
+            updateStatus(`Đã nạp thành công ${validItems.length} ảnh trong chớp mắt. Sẵn sàng tạo file PDF.`, 'success');
         }
 
         // Vẽ lại danh sách giao diện
@@ -963,7 +932,7 @@
                 card.innerHTML = `
                     <div class="image-item-body">
                         <div class="image-thumbnail-box" title="Bấm vào để phóng to ảnh">
-                            <img src="${item.dataUrl}" alt="${item.name}">
+                            <img src="${item.previewUrl}" alt="${item.name}">
                             <div class="thumbnail-zoom-hint">
                                 <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
                             </div>
@@ -1022,6 +991,7 @@
                 }
 
                 btnDelete.addEventListener('click', () => {
+                    URL.revokeObjectURL(item.previewUrl); // Thu hồi bộ nhớ Blob
                     imageItems.splice(index, 1);
                     renderImageList();
                     updateStatus('Đã xoá một ảnh khỏi danh sách.', 'info');
@@ -1032,7 +1002,7 @@
         }
 
         // ==========================================================
-        // XỬ LÝ MODAL PHÓNG TO & NÚT VỪA MÀN HÌNH
+        // XỬ LÝ MODAL PHÓNG TO GRID 100DVH
         // ==========================================================
         function updateTransform() {
             const maxPan = 400 * currentZoom;
@@ -1064,7 +1034,7 @@
             }
 
             const item = imageItems[currentModalIndex];
-            modalImage.src = item.dataUrl;
+            modalImage.src = item.previewUrl;
             modalPageBadge.textContent = `Trang ${currentModalIndex + 1}/${imageItems.length}`;
             modalImageName.textContent = item.name;
             modalImageName.title = item.name;
@@ -1085,7 +1055,7 @@
         function closeImageViewer() {
             modalViewer.classList.add('hidden');
             document.body.classList.remove('modal-open');
-            modalImage.src = ''; // Thu dọn bộ nhớ ảnh
+            modalImage.src = '';
         }
 
         function showPrevImage() {
@@ -1116,7 +1086,7 @@
 
         btnZoomIn.addEventListener('click', () => setZoom(currentZoom + 0.25));
         btnZoomOut.addEventListener('click', () => setZoom(currentZoom - 0.25));
-        btnZoomFit.addEventListener('click', resetZoom); // Nút Vừa màn hình (1:1)
+        btnZoomFit.addEventListener('click', resetZoom);
 
         // Phím tắt bàn phím
         window.addEventListener('keydown', (e) => {
@@ -1165,7 +1135,6 @@
             isDragging = false;
             modalViewport.classList.remove('is-dragging');
 
-            // Bỏ qua sự kiện chuột ảo nếu vừa có thao tác chạm trên điện thoại
             if (Date.now() - lastTouchEndTime < 600) return;
 
             if (!hasMoved && currentZoom === 1 && !e.target.closest('.btn-modal-nav')) {
@@ -1179,7 +1148,7 @@
             }
         });
 
-        // Cảm ứng điện thoại (Đã loại bỏ hoàn toàn nhấp đúp, khóa 1 chạm = 1 trang)
+        // Cảm ứng điện thoại
         modalViewport.addEventListener('touchstart', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
 
@@ -1221,7 +1190,6 @@
         modalViewport.addEventListener('touchend', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
 
-            // Xử lý chuyển đúng 1 trang duy nhất khi chạm tay
             if (!hasMoved && currentZoom === 1 && e.changedTouches.length === 1) {
                 lastTouchEndTime = Date.now();
                 const touch = e.changedTouches[0];
@@ -1294,6 +1262,7 @@
         btnClearAll.addEventListener('click', () => {
             if (imageItems.length === 0) return;
             if (confirm('Bạn có chắc chắn muốn xoá toàn bộ danh sách ảnh không?')) {
+                imageItems.forEach(item => URL.revokeObjectURL(item.previewUrl));
                 imageItems = [];
                 renderImageList();
                 updateStatus('Đã làm trống danh sách.', 'info');
@@ -1306,6 +1275,38 @@
             renderImageList();
             updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
         });
+
+        // Hàm hỗ trợ render từng trang PDF bằng Canvas tái sử dụng duy nhất
+        async function getCleanDataUrlForPdf(file, reusableCanvas) {
+            if ('createImageBitmap' in window) {
+                const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+                reusableCanvas.width = bitmap.width;
+                reusableCanvas.height = bitmap.height;
+                const ctx = reusableCanvas.getContext('2d');
+                ctx.drawImage(bitmap, 0, 0);
+                const dataUrl = reusableCanvas.toDataURL('image/jpeg', 0.95);
+                bitmap.close();
+                return { width: reusableCanvas.width, height: reusableCanvas.height, dataUrl };
+            } else {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            reusableCanvas.width = img.naturalWidth;
+                            reusableCanvas.height = img.naturalHeight;
+                            const ctx = reusableCanvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            const dataUrl = reusableCanvas.toDataURL('image/jpeg', 0.95);
+                            img.src = '';
+                            resolve({ width: reusableCanvas.width, height: reusableCanvas.height, dataUrl });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
 
         btnExportPdf.addEventListener('click', async () => {
             if (imageItems.length === 0) {
@@ -1321,40 +1322,38 @@
             }
 
             btnExportPdf.disabled = true;
-            updateStatus('Đang xuất file PDF chuẩn tỉ lệ từng ảnh...', 'info');
+            updateStatus('Đang tạo và ghép trang PDF chuẩn tỉ lệ...', 'info');
 
             try {
                 const { jsPDF } = window.jspdf;
+                const reusableCanvas = document.createElement('canvas');
 
                 // Trang 1
-                const first = imageItems[0];
-                const firstIsLandscape = first.width > first.height;
-                const firstOrient = firstIsLandscape ? 'l' : 'p';
+                const firstRender = await getCleanDataUrlForPdf(imageItems[0].file, reusableCanvas);
+                const firstOrient = firstRender.width > firstRender.height ? 'l' : 'p';
                 
                 const doc = new jsPDF({
                     orientation: firstOrient,
                     unit: 'px',
-                    format: [first.width, first.height],
+                    format: [firstRender.width, firstRender.height],
                     hotfixes: ['px_scaling']
                 });
 
                 const pWidth1 = doc.internal.pageSize.getWidth();
                 const pHeight1 = doc.internal.pageSize.getHeight();
-                doc.addImage(first.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1);
+                doc.addImage(firstRender.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1);
 
-                // Các trang tiếp theo
+                // Các trang tiếp theo (xử lý cuốn chiếu nhẹ nhàng)
                 for (let i = 1; i < imageItems.length; i++) {
-                    const current = imageItems[i];
-                    updateStatus(`Đang ghép trang ${i + 1}/${imageItems.length} (${current.width} × ${current.height} px)...`, 'info');
-                    
-                    const isLandscape = current.width > current.height;
-                    const orient = isLandscape ? 'l' : 'p';
+                    updateStatus(`Đang ghép trang ${i + 1}/${imageItems.length}...`, 'info');
+                    const currentRender = await getCleanDataUrlForPdf(imageItems[i].file, reusableCanvas);
+                    const orient = currentRender.width > currentRender.height ? 'l' : 'p';
 
-                    doc.addPage([current.width, current.height], orient);
+                    doc.addPage([currentRender.width, currentRender.height], orient);
 
                     const pWidth = doc.internal.pageSize.getWidth();
                     const pHeight = doc.internal.pageSize.getHeight();
-                    doc.addImage(current.dataUrl, 'JPEG', 0, 0, pWidth, pHeight);
+                    doc.addImage(currentRender.dataUrl, 'JPEG', 0, 0, pWidth, pHeight);
                 }
 
                 // Tên file chuẩn: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
