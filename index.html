@@ -288,6 +288,7 @@
             color: var(--color-panel);
         }
 
+        /* BỐ CỤC THẺ ẢNH DANH SÁCH */
         .image-item-card {
             display: flex;
             flex-direction: column;
@@ -458,7 +459,7 @@
             flex-shrink: 0;
         }
 
-        /* MODAL VIEWER: CẤU TRÚC GRID 3 TẦNG KHÓA CỨNG 100DVH */
+        /* MODAL VIEWER: GRID 100DVH (KHÔNG ĐÈ NÚT) */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -473,7 +474,6 @@
             overflow: hidden;
         }
 
-        /* TẦNG 1: NÓC (TRONG SUỐT) */
         .modal-top-bar {
             grid-row: 1;
             display: flex;
@@ -525,7 +525,6 @@
             fill: currentColor;
         }
 
-        /* TẦNG 2: KHUNG ẢNH Ở GIỮA (1FR ĐỘC LẬP HOÀN TOÀN) */
         .modal-viewport {
             grid-row: 2;
             position: relative;
@@ -598,7 +597,6 @@
             right: 0.5rem;
         }
 
-        /* TẦNG 3: ĐÁY (TRONG SUỐT) */
         .modal-bottom-bar {
             grid-row: 3;
             display: flex;
@@ -648,7 +646,6 @@
             display: none;
         }
 
-        /* RESPONSIVE HỢP NHẤT CHO THIẾT BỊ DI ĐỘNG */
         @media (max-width: 600px) {
             .btn-modal-nav {
                 width: 2.3rem;
@@ -745,7 +742,7 @@
             </div>
         </div>
 
-        <!-- HÀNG 2: KHUNG ẢNH TRUNG TÂM (TỰ ĐỘNG VỪA VẶN) -->
+        <!-- HÀNG 2: KHUNG ẢNH TRUNG TÂM -->
         <div class="modal-viewport" id="modal-viewport">
             <button type="button" class="btn-modal-nav btn-nav-prev" id="btn-modal-prev" title="Ảnh trước (Mũi tên Trái)">
                 <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -808,7 +805,7 @@
         let hasMoved = false;
         let initialPinchDistance = 0;
         let initialZoomOnPinch = 1;
-        let lastTapTime = 0;
+        let lastTouchEndTime = 0; // Biến khóa chống kích hoạt kép trên điện thoại
 
         // Cập nhật thông báo trạng thái
         function updateStatus(message, type = 'info') {
@@ -835,7 +832,7 @@
             return formatted.toLocaleString('vi-VN') + ' ' + sizes[i];
         }
 
-        // Chuẩn hoá ảnh qua Canvas (Khử góc xoay EXIF, dọn rác RAM tức thì)
+        // Chuẩn hoá ảnh qua Canvas (Khử góc xoay EXIF, thu dọn RAM tức thì)
         function renderToCleanCanvas(file) {
             return new Promise((resolve, reject) => {
                 if (!file.type.startsWith('image/')) {
@@ -881,7 +878,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
                     const cleanDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                    img.src = ''; // Giải phóng bộ nhớ ảnh tạm
+                    img.src = ''; // Thu dọn bộ nhớ
 
                     resolve({
                         width: canvas.width,
@@ -1024,7 +1021,7 @@
         }
 
         // ==========================================================
-        // XỬ LÝ MODAL PHÓNG TO GRID 100DVH (BẤT BIẾN, KHÔNG ĐÈ NÚT)
+        // XỬ LÝ MODAL PHÓNG TO GRID 100DVH (ĐÃ KHÓA 1 LẦN CHẠM = 1 TRANG)
         // ==========================================================
         function updateTransform() {
             const maxPan = 400 * currentZoom;
@@ -1077,7 +1074,7 @@
         function closeImageViewer() {
             modalViewer.classList.add('hidden');
             document.body.classList.remove('modal-open');
-            modalImage.src = ''; // Thu dọn bộ nhớ ảnh tức thì
+            modalImage.src = ''; // Thu dọn bộ nhớ ảnh
         }
 
         function showPrevImage() {
@@ -1157,6 +1154,9 @@
             isDragging = false;
             modalViewport.classList.remove('is-dragging');
 
+            // Bỏ qua sự kiện chuột ảo nếu vừa có thao tác chạm trên điện thoại
+            if (Date.now() - lastTouchEndTime < 600) return;
+
             if (!hasMoved && currentZoom === 1 && !e.target.closest('.btn-modal-nav')) {
                 const rect = modalViewport.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
@@ -1168,17 +1168,11 @@
             }
         });
 
-        // Cảm ứng điện thoại (Touch Drag & Pinch Zoom & Chạm chuyển ảnh)
+        // Cảm ứng điện thoại (Đã loại bỏ hoàn toàn nhấp đúp, khóa 1 chạm = 1 trang)
         modalViewport.addEventListener('touchstart', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
 
             if (e.touches.length === 1) {
-                const now = Date.now();
-                if (now - lastTapTime < 300) {
-                    setZoom(currentZoom > 1 ? 1 : 2);
-                }
-                lastTapTime = now;
-
                 isDragging = true;
                 hasMoved = false;
                 startX = e.touches[0].clientX - panX;
@@ -1216,7 +1210,9 @@
         modalViewport.addEventListener('touchend', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
 
+            // Xử lý chuyển đúng 1 trang duy nhất khi chạm tay
             if (!hasMoved && currentZoom === 1 && e.changedTouches.length === 1) {
+                lastTouchEndTime = Date.now(); // Khóa chống chuột ảo phát sinh
                 const touch = e.changedTouches[0];
                 const rect = modalViewport.getBoundingClientRect();
                 const touchX = touch.clientX - rect.left;
