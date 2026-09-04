@@ -49,10 +49,29 @@
             overflow: hidden;
         }
 
-        h1 { font-size: 1.5rem; font-weight: bold; text-align: center; color: var(--color-primary); margin-top: 0.5rem; margin-bottom: 0.25rem; }
-        h2 { font-size: 1.3rem; font-weight: bold; }
-        h3 { font-size: 1.2rem; font-weight: bold; }
-        h4 { font-size: 1.1rem; font-weight: bold; }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
 
         .author-signature {
             font-size: 1.2rem;
@@ -100,6 +119,10 @@
             pointer-events: auto;
         }
 
+        .dropzone-container label.btn * {
+            pointer-events: none;
+        }
+
         .dropzone-icon {
             width: 3rem;
             height: 3rem;
@@ -120,8 +143,15 @@
             margin-bottom: 0.75rem;
         }
 
+        /* Ẩn thẻ input an toàn trong cây dựng hình (Render Tree) với 100% đơn vị rem */
         .hidden-file-input {
-            display: none;
+            position: absolute;
+            opacity: 0;
+            width: 0.1rem;
+            height: 0.1rem;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
 
         .btn {
@@ -153,16 +183,54 @@
             fill: currentColor;
         }
 
-        .btn-primary { background-color: var(--color-primary); color: var(--color-white); }
-        .btn-primary:hover:not(:disabled):not(.is-disabled) { background-color: var(--color-primary-hover); }
-        .btn-success { background-color: var(--color-success); color: var(--color-white); }
-        .btn-success:hover:not(:disabled):not(.is-disabled) { background-color: var(--color-success); opacity: 0.85; }
-        .btn-danger { background-color: var(--color-danger); color: var(--color-white); }
-        .btn-danger:hover:not(:disabled):not(.is-disabled) { background-color: var(--color-danger); opacity: 0.85; }
-        .btn-warning { background-color: var(--color-warning); color: var(--color-white); }
-        .btn-warning:hover:not(:disabled):not(.is-disabled) { background-color: var(--color-warning); opacity: 0.85; }
-        .btn-outline { background-color: var(--color-white); color: var(--color-dark); border: 2px solid var(--color-border); }
-        .btn-outline:hover:not(:disabled):not(.is-disabled) { border-color: var(--color-dark); }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+
+        .btn-primary:hover:not(:disabled):not(.is-disabled) {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: var(--color-white);
+        }
+
+        .btn-success:hover:not(:disabled):not(.is-disabled) {
+            background-color: var(--color-success);
+            opacity: 0.85;
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: var(--color-white);
+        }
+
+        .btn-danger:hover:not(:disabled):not(.is-disabled) {
+            background-color: var(--color-danger);
+            opacity: 0.85;
+        }
+
+        .btn-warning {
+            background-color: var(--color-warning);
+            color: var(--color-white);
+        }
+
+        .btn-warning:hover:not(:disabled):not(.is-disabled) {
+            background-color: var(--color-warning);
+            opacity: 0.85;
+        }
+
+        .btn-outline {
+            background-color: var(--color-white);
+            color: var(--color-dark);
+            border: 2px solid var(--color-border);
+        }
+
+        .btn-outline:hover:not(:disabled):not(.is-disabled) {
+            border-color: var(--color-dark);
+        }
 
         .btn-control {
             display: inline-flex;
@@ -261,6 +329,7 @@
             color: var(--color-panel);
         }
 
+        /* BỐ CỤC THẺ ẢNH DANH SÁCH */
         .image-item-card {
             display: flex;
             flex-direction: column;
@@ -437,7 +506,7 @@
             flex-shrink: 0;
         }
 
-        /* MODAL VIEWER */
+        /* MODAL VIEWER: GRID 100DVH */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -651,6 +720,33 @@
         .hidden {
             display: none;
         }
+
+        @media (max-width: 600px) {
+            .btn-modal-nav {
+                width: 2.3rem;
+                height: 2.3rem;
+            }
+            .btn-nav-prev {
+                left: 0.25rem;
+            }
+            .btn-nav-next {
+                right: 0.25rem;
+            }
+            .modal-controls-group {
+                gap: 0.35rem;
+            }
+            .btn-modal-close {
+                margin-left: 0.2rem;
+            }
+            .modal-pill-name {
+                max-width: 16rem;
+            }
+            .badge-zoom-indicator {
+                min-width: 2.8rem;
+                padding: 0.35rem 0.4rem;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -712,6 +808,7 @@
 
     <!-- CỬA SỔ XEM ẢNH TOÀN MÀN HÌNH (MODAL VIEWER) -->
     <div id="modal-viewer" class="modal-overlay hidden" role="dialog" aria-modal="true">
+        <!-- HÀNG 1: NÓC -->
         <div class="modal-top-bar">
             <span id="modal-page-badge" class="badge-page-index">Trang 1/1</span>
             <div class="modal-controls-group">
@@ -731,16 +828,20 @@
             </div>
         </div>
 
+        <!-- HÀNG 2: KHUNG ẢNH TRUNG TÂM -->
         <div class="modal-viewport" id="modal-viewport">
             <button type="button" class="btn-modal-nav btn-nav-prev" id="btn-modal-prev" title="Ảnh trước (Mũi tên Trái)">
                 <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
             </button>
+
             <img id="modal-image" class="modal-image" src="" alt="Xem trước chi tiết">
+
             <button type="button" class="btn-modal-nav btn-nav-next" id="btn-modal-next" title="Ảnh sau (Mũi tên Phải)">
                 <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
             </button>
         </div>
 
+        <!-- HÀNG 3: ĐÁY -->
         <div class="modal-bottom-bar">
             <div class="modal-footer-content">
                 <span id="modal-image-name" class="modal-pill-name" title="tên_ảnh.jpg">tên_ảnh.jpg</span>
@@ -750,16 +851,25 @@
     </div>
 
     <script>
+        // Mảng chứa danh sách ảnh
         let imageItems = [];
         let isExporting = false;
         let isIngesting = false;
+
+        // Bộ đếm kéo thả chống nhấp nháy giao diện
         let dragCounter = 0;
+
+        // Quản lý xác nhận xoá an toàn 2 bước không dùng popup mặc định
         let clearAllConfirmPending = false;
         let clearAllTimeout = null;
+
+        // Lưu phần tử tập trung trước khi mở modal để khôi phục khi đóng
         let lastFocusedElement = null;
+
+        // Giới hạn cạnh lớn nhất khi nạp vào Canvas để chống tràn RAM sập tab
         const MAX_CANVAS_DIMENSION = 4096;
 
-        // Dom references
+        // Tham chiếu DOM chính
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const btnBrowse = document.getElementById('btn-browse');
@@ -773,6 +883,7 @@
         const statusBox = document.getElementById('status-box');
         const statusText = document.getElementById('status-text');
 
+        // Tham chiếu DOM Modal Viewer
         const modalViewer = document.getElementById('modal-viewer');
         const modalImage = document.getElementById('modal-image');
         const modalPageBadge = document.getElementById('modal-page-badge');
@@ -787,8 +898,10 @@
         const btnModalPrev = document.getElementById('btn-modal-prev');
         const btnModalNext = document.getElementById('btn-modal-next');
 
+        // Ngăn chặn trình duyệt kéo ảnh mặc định
         modalImage.ondragstart = (e) => e.preventDefault();
 
+        // Trạng thái Modal
         let currentModalIndex = 0;
         let currentZoom = 1;
         let panX = 0;
@@ -797,6 +910,8 @@
         let startX = 0;
         let startY = 0;
         let hasMoved = false;
+
+        // Quản lý cử chỉ cảm ứng (Chỉ dùng Pinch 2 ngón & Swipe vuốt 1 ngón, hoàn toàn không dùng double-click/double-tap)
         let initialPinchDistance = 0;
         let initialZoomOnPinch = 1;
         let initialMidX = 0;
@@ -806,7 +921,11 @@
         let touchStartX = 0;
         let touchStartY = 0;
 
-        window.addEventListener('dragover', (e) => e.preventDefault());
+        // BẢO VỆ TOÀN TRANG: Chặn chuyển hướng và hỗ trợ thả tệp ở bất kỳ đâu trên màn hình
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
         window.addEventListener('drop', (e) => {
             e.preventDefault();
             dragCounter = 0;
@@ -824,10 +943,14 @@
             }
         });
 
+        // BẢO VỆ IOS SAFARI: Chặn hiện tượng cuộn nền trôi trang khi vuốt thanh nóc/đáy của modal
         modalViewer.addEventListener('touchmove', (e) => {
-            if (!e.target.closest('#modal-viewport')) e.preventDefault();
+            if (!e.target.closest('#modal-viewport')) {
+                e.preventDefault();
+            }
         }, { passive: false });
 
+        // Khử mã độc XSS trong chuỗi văn bản tên file
         function escapeHtml(str) {
             return String(str).replace(/[&<>"']/g, (m) => {
                 switch (m) {
@@ -841,6 +964,7 @@
             });
         }
 
+        // Cập nhật thông báo trạng thái
         function updateStatus(message, type = 'info') {
             statusText.textContent = message;
             statusBox.className = 'status-box ' + type;
@@ -857,6 +981,7 @@
             statusBox.querySelector('.status-icon').innerHTML = iconSvg;
         }
 
+        // Hoàn nguyên nút Xoá tất cả về trạng thái gốc
         function resetClearAllButton() {
             clearAllConfirmPending = false;
             if (clearAllTimeout) {
@@ -870,14 +995,28 @@
             `;
         }
 
+        // Đồng bộ trạng thái các nút điều khiển chính theo máy trạng thái dữ liệu
         function updateActionBarState() {
             if (isExporting) return;
+
             const total = imageItems.length;
-            btnClearAll.disabled = total === 0;
-            btnReverseOrder.disabled = total <= 1;
-            btnExportPdf.disabled = total === 0;
+            if (total === 0) {
+                resetClearAllButton();
+                btnClearAll.disabled = true;
+                btnReverseOrder.disabled = true;
+                btnExportPdf.disabled = true;
+            } else if (total === 1) {
+                btnClearAll.disabled = false;
+                btnReverseOrder.disabled = true;
+                btnExportPdf.disabled = false;
+            } else {
+                btnClearAll.disabled = false;
+                btnReverseOrder.disabled = false;
+                btnExportPdf.disabled = false;
+            }
         }
 
+        // Khóa / Mở toàn bộ nút thao tác khi đang xuất PDF
         function setExportingState(exporting) {
             isExporting = exporting;
             resetClearAllButton();
@@ -894,9 +1033,34 @@
                 dropZone.classList.remove('is-disabled');
                 updateActionBarState();
             }
-            imageListContainer.querySelectorAll('.btn-control').forEach(btn => btn.disabled = exporting);
+
+            const controlBtns = imageListContainer.querySelectorAll('.btn-control');
+            controlBtns.forEach(btn => {
+                btn.disabled = exporting;
+            });
         }
 
+        // Định dạng dung lượng
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            const formatted = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+            return formatted.toLocaleString('vi-VN') + ' ' + sizes[i];
+        }
+
+        // Fallback đọc kích thước ảnh cho trình duyệt cũ
+        function getImageDimensionsFallback(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+                img.onerror = () => resolve({ width: 800, height: 600 });
+                img.src = url;
+            });
+        }
+
+        // Hàm nạp Bitmap đa tầng tương thích hoàn hảo mọi phiên bản Safari
         async function loadSafeBitmap(file) {
             if ('createImageBitmap' in window) {
                 try {
@@ -912,64 +1076,97 @@
             return null;
         }
 
+        // Nạp và tiền xử lý tập tin ảnh an toàn bộ nhớ
         async function processFastImage(file) {
             let previewUrl = null;
             try {
                 if (file.size === 0) return null;
+
                 previewUrl = URL.createObjectURL(file);
-                let width = 0, height = 0;
+                let width = 0;
+                let height = 0;
+
                 const bitmap = await loadSafeBitmap(file);
                 if (bitmap) {
-                    width = bitmap.width; height = bitmap.height;
+                    width = bitmap.width;
+                    height = bitmap.height;
                     bitmap.close();
                 } else {
                     const dim = await getImageDimensionsFallback(previewUrl);
-                    width = dim.width; height = dim.height;
+                    width = dim.width;
+                    height = dim.height;
                 }
+
                 if (width <= 0 || height <= 0) {
                     URL.revokeObjectURL(previewUrl);
                     return null;
                 }
+
                 return {
                     id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    file, name: file.name, size: file.size, sizeFormatted: formatBytes(file.size),
-                    width, height, previewUrl, orientation: width > height ? 'landscape' : 'portrait'
+                    file: file,
+                    name: file.name || 'anh-chup.jpg',
+                    size: file.size,
+                    sizeFormatted: formatBytes(file.size),
+                    width: width,
+                    height: height,
+                    previewUrl: previewUrl,
+                    orientation: width > height ? 'landscape' : 'portrait'
                 };
             } catch (err) {
-                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+                console.error('Lỗi khi nạp ảnh:', err);
                 return null;
             }
         }
 
         async function handleIncomingFiles(fileList) {
             if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+
             const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
             if (files.length === 0) {
                 updateStatus('Không tìm thấy tập tin hình ảnh hợp lệ nào.', 'error');
                 return;
             }
+
             isIngesting = true;
             btnBrowse.classList.add('is-disabled');
             updateStatus(`Đang kiểm tra và nạp ${files.length} ảnh...`, 'info');
+
             try {
-                const results = await Promise.all(files.map(processFastImage));
+                const promises = files.map(file => processFastImage(file));
+                const results = await Promise.all(promises);
                 const validItems = results.filter(item => item !== null);
+
                 if (validItems.length === 0) {
-                    updateStatus('Không thể đọc dữ liệu ảnh.', 'error');
+                    updateStatus('Không thể đọc nội dung các tập tin ảnh đã chọn (tập tin có thể bị lỗi hoặc định dạng không hỗ trợ).', 'error');
                     return;
                 }
+
                 imageItems.push(...validItems);
                 renderImageList();
-                updateStatus(validItems.length === files.length ? `Đã nạp thành công ${validItems.length} ảnh.` : `Đã nạp ${validItems.length}/${files.length} ảnh (bỏ qua ${files.length - validItems.length} tệp lỗi).`, validItems.length === files.length ? 'success' : 'warning');
+
+                if (validItems.length === files.length) {
+                    updateStatus(`Đã nạp thành công ${validItems.length} ảnh. Sẵn sàng tạo file PDF.`, 'success');
+                } else {
+                    const skippedCount = files.length - validItems.length;
+                    updateStatus(`Đã nạp thành công ${validItems.length}/${files.length} ảnh (có ${skippedCount} tập tin bị lỗi hoặc không hỗ trợ đã tự động bỏ qua).`, 'warning');
+                }
             } finally {
                 isIngesting = false;
-                if (!isExporting) btnBrowse.classList.remove('is-disabled');
+                if (!isExporting) {
+                    btnBrowse.classList.remove('is-disabled');
+                }
             }
         }
 
+        // Vẽ lại danh sách giao diện và cập nhật tổng dung lượng
         function renderImageList() {
             resetClearAllButton();
             totalCountEl.textContent = imageItems.length.toLocaleString('vi-VN');
+
             if (imageItems.length === 0) {
                 totalDimensionsSummaryEl.textContent = '';
                 imageListContainer.innerHTML = '';
@@ -978,94 +1175,211 @@
                 updateActionBarState();
                 return;
             }
-            totalDimensionsSummaryEl.textContent = `Tổng dung lượng: ${formatBytes(imageItems.reduce((acc, item) => acc + item.size, 0))}`;
+
+            const totalBytes = imageItems.reduce((acc, item) => acc + item.size, 0);
+            totalDimensionsSummaryEl.textContent = `Tổng dung lượng: ${formatBytes(totalBytes)}`;
+
             emptyState.classList.add('hidden');
             imageListContainer.innerHTML = '';
+
             imageItems.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'image-item-card';
+
+                const orientationText = item.width > item.height ? 'Khổ ngang' : 'Khổ dọc';
+                const safeName = escapeHtml(item.name);
+
                 card.innerHTML = `
                     <div class="image-item-body">
-                        <div class="image-thumbnail-box" tabindex="0" role="button" title="Xem ảnh"><img src="${item.previewUrl}" alt=""></div>
+                        <div class="image-thumbnail-box" tabindex="0" role="button" aria-label="Xem ảnh ${safeName}" title="Bấm vào để xem ảnh">
+                            <img src="${item.previewUrl}" alt="${safeName}">
+                            <div class="thumbnail-zoom-hint">
+                                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
+                            </div>
+                        </div>
                         <div class="image-info-box">
-                            <div class="image-tag-row"><span class="badge-page-index">Trang ${index + 1}</span></div>
-                            <div class="image-name">${escapeHtml(item.name)}</div>
-                            <div class="image-specs"><span>${item.width} × ${item.height} px</span></div>
+                            <div class="image-tag-row">
+                                <span class="badge-page-index">Trang ${index + 1}</span>
+                                <span class="badge-orientation">${orientationText}</span>
+                            </div>
+                            <div class="image-name" title="${safeName}">${safeName}</div>
+                            <div class="image-specs">
+                                <span class="badge-dim">${item.width} × ${item.height} px</span>
+                                <span>${item.sizeFormatted}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="image-item-footer">
-                        <button type="button" class="btn-control btn-move-up" ${index === 0 || isExporting ? 'disabled' : ''}>Lên</button>
-                        <button type="button" class="btn-control btn-move-down" ${index === imageItems.length - 1 || isExporting ? 'disabled' : ''}>Xuống</button>
-                        <button type="button" class="btn-control btn-delete" ${isExporting ? 'disabled' : ''}>Xoá</button>
+                        <button type="button" class="btn-control btn-move-up" ${index === 0 || isExporting ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+                            Lên
+                        </button>
+                        <button type="button" class="btn-control btn-move-down" ${index === imageItems.length - 1 || isExporting ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                            Xuống
+                        </button>
+                        <button type="button" class="btn-control btn-delete" ${isExporting ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            Xoá
+                        </button>
                     </div>
                 `;
-                card.querySelector('.image-thumbnail-box').addEventListener('click', () => openImageViewer(index));
-                card.querySelector('.btn-move-up').addEventListener('click', () => { [imageItems[index], imageItems[index - 1]] = [imageItems[index - 1], imageItems[index]]; renderImageList(); });
-                card.querySelector('.btn-move-down').addEventListener('click', () => { [imageItems[index], imageItems[index + 1]] = [imageItems[index + 1], imageItems[index]]; renderImageList(); });
-                card.querySelector('.btn-delete').addEventListener('click', () => { URL.revokeObjectURL(item.previewUrl); imageItems.splice(index, 1); renderImageList(); });
+
+                const thumbBox = card.querySelector('.image-thumbnail-box');
+                thumbBox.addEventListener('click', () => openImageViewer(index));
+                thumbBox.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openImageViewer(index);
+                    }
+                });
+
+                const btnUp = card.querySelector('.btn-move-up');
+                const btnDown = card.querySelector('.btn-move-down');
+                const btnDelete = card.querySelector('.btn-delete');
+
+                if (index > 0) {
+                    btnUp.addEventListener('click', () => {
+                        if (isExporting) return;
+                        const temp = imageItems[index];
+                        imageItems[index] = imageItems[index - 1];
+                        imageItems[index - 1] = temp;
+                        renderImageList();
+                    });
+                }
+
+                if (index < imageItems.length - 1) {
+                    btnDown.addEventListener('click', () => {
+                        if (isExporting) return;
+                        const temp = imageItems[index];
+                        imageItems[index] = imageItems[index + 1];
+                        imageItems[index + 1] = temp;
+                        renderImageList();
+                    });
+                }
+
+                btnDelete.addEventListener('click', () => {
+                    if (isExporting) return;
+                    URL.revokeObjectURL(item.previewUrl);
+                    imageItems.splice(index, 1);
+                    renderImageList();
+                    updateStatus('Đã xoá một ảnh khỏi danh sách.', 'info');
+                });
+
                 imageListContainer.appendChild(card);
             });
+
             updateActionBarState();
         }
 
-        // Zoom & Pan Engine
+        // ==========================================================
+        // ĐỘNG CƠ XỬ LÝ TOÁN HỌC ZOOM & PAN (FOCAL POINT ZOOM)
+        // ==========================================================
+
         function getBaseImageDimensions() {
-            if (!imageItems[currentModalIndex]) return { width: 1, height: 1 };
-            const item = imageItems[currentModalIndex];
-            const vW = Math.max(modalViewport.clientWidth * 0.98, 1);
-            const vH = Math.max(modalViewport.clientHeight * 0.98, 1);
-            const ratio = Math.min(vW / item.width, vH / item.height);
-            return { width: item.width * ratio, height: item.height * ratio };
+            if (imageItems[currentModalIndex]) {
+                const item = imageItems[currentModalIndex];
+                const vW = Math.max(modalViewport.clientWidth * 0.98, 1);
+                const vH = Math.max(modalViewport.clientHeight * 0.98, 1);
+                const ratio = Math.min(vW / item.width, vH / item.height);
+                return { width: item.width * ratio, height: item.height * ratio };
+            }
+            return { width: 1, height: 1 };
         }
 
         function clampPan(targetZoom, x, y) {
-            if (targetZoom <= 1) return { x: 0, y: 0 };
+            if (targetZoom <= 1) {
+                return { x: 0, y: 0 };
+            }
+
             const dims = getBaseImageDimensions();
-            const maxPanX = Math.max(0, (dims.width * targetZoom - modalViewport.clientWidth) / 2);
-            const maxPanY = Math.max(0, (dims.height * targetZoom - modalViewport.clientHeight) / 2);
-            return { x: Math.max(-maxPanX, Math.min(maxPanX, x)), y: Math.max(-maxPanY, Math.min(maxPanY, y)) };
+            const scaledWidth = dims.width * targetZoom;
+            const scaledHeight = dims.height * targetZoom;
+
+            const viewportWidth = modalViewport.clientWidth;
+            const viewportHeight = modalViewport.clientHeight;
+
+            const maxPanX = scaledWidth > viewportWidth ? (scaledWidth - viewportWidth) / 2 : 0;
+            const maxPanY = scaledHeight > viewportHeight ? (scaledHeight - viewportHeight) / 2 : 0;
+
+            const clampedX = Math.max(-maxPanX, Math.min(maxPanX, x));
+            const clampedY = Math.max(-maxPanY, Math.min(maxPanY, y));
+
+            return { x: clampedX, y: clampedY };
         }
 
         function applyTransform(animate = false) {
-            modalImage.className = 'modal-image' + (animate ? ' smooth-transition' : '');
+            if (animate) {
+                modalImage.classList.add('smooth-transition');
+            } else {
+                modalImage.classList.remove('smooth-transition');
+            }
+
             modalImage.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
             modalZoomLevel.textContent = Math.round(currentZoom * 100) + '%';
-            modalViewport.classList.toggle('can-drag', currentZoom > 1.05);
+
+            if (currentZoom > 1.05) {
+                modalViewport.classList.add('can-drag');
+            } else {
+                modalViewport.classList.remove('can-drag');
+            }
+
             btnZoomIn.disabled = (currentZoom >= 4.0);
             btnZoomOut.disabled = (currentZoom <= 0.5);
         }
 
-        function zoomTo(targetZoom, focalX = null, focalY = null, animate = false) {
+        function zoomTo(targetZoom, focalScreenX = null, focalScreenY = null, animate = false) {
             const nextZoom = Math.min(Math.max(targetZoom, 0.5), 4.0);
             if (Math.abs(nextZoom - currentZoom) < 0.001) return;
+
             const rect = modalViewport.getBoundingClientRect();
-            let fx = focalX ? focalX - (rect.left + rect.width / 2) : 0;
-            let fy = focalY ? focalY - (rect.top + rect.height / 2) : 0;
-            const ratio = nextZoom / currentZoom;
-            panX = fx - (fx - panX) * ratio;
-            panY = fy - (fy - panY) * ratio;
+            let focalX = 0;
+            let focalY = 0;
+
+            if (focalScreenX !== null && focalScreenY !== null) {
+                focalX = focalScreenX - (rect.left + rect.width / 2);
+                focalY = focalScreenY - (rect.top + rect.height / 2);
+            }
+
+            const zoomRatio = nextZoom / currentZoom;
+            const nextPanX = focalX - (focalX - panX) * zoomRatio;
+            const nextPanY = focalY - (focalY - panY) * zoomRatio;
+
             currentZoom = nextZoom;
-            const clamped = clampPan(currentZoom, panX, panY);
-            panX = clamped.x; panY = clamped.y;
+            const clamped = clampPan(currentZoom, nextPanX, nextPanY);
+            panX = clamped.x;
+            panY = clamped.y;
+
             applyTransform(animate);
         }
 
-        function resetZoom(animate = true) { currentZoom = 1; panX = 0; panY = 0; applyTransform(animate); }
+        function resetZoom(animate = true) {
+            currentZoom = 1;
+            panX = 0;
+            panY = 0;
+            applyTransform(animate);
+        }
 
         function renderModalContent() {
-            if (imageItems.length === 0) return closeImageViewer();
+            if (imageItems.length === 0 || currentModalIndex < 0 || currentModalIndex >= imageItems.length) {
+                closeImageViewer();
+                return;
+            }
+
             const item = imageItems[currentModalIndex];
             modalImage.src = item.previewUrl;
             modalPageBadge.textContent = `Trang ${currentModalIndex + 1}/${imageItems.length}`;
             modalImageName.textContent = item.name;
+            modalImageName.title = item.name;
             modalImageSpecs.textContent = `${item.width} × ${item.height} px`;
-            btnModalPrev.disabled = currentModalIndex === 0;
-            btnModalNext.disabled = currentModalIndex === imageItems.length - 1;
+
+            btnModalPrev.disabled = (currentModalIndex === 0);
+            btnModalNext.disabled = (currentModalIndex === imageItems.length - 1);
         }
 
-        function openImageViewer(idx) {
+        function openImageViewer(index) {
             lastFocusedElement = document.activeElement;
-            currentModalIndex = idx;
+            currentModalIndex = index;
             renderModalContent();
             resetZoom(false);
             document.body.classList.add('modal-open');
@@ -1077,135 +1391,559 @@
             modalViewer.classList.add('hidden');
             document.body.classList.remove('modal-open');
             modalImage.src = '';
-            if (lastFocusedElement) lastFocusedElement.focus();
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
+            }
         }
 
+        function showPrevImage() {
+            if (currentModalIndex > 0) {
+                currentModalIndex--;
+                renderModalContent();
+                resetZoom(false);
+            }
+        }
+
+        function showNextImage() {
+            if (currentModalIndex < imageItems.length - 1) {
+                currentModalIndex++;
+                renderModalContent();
+                resetZoom(false);
+            }
+        }
+
+        // Các sự kiện điều khiển modal: Chỉ đóng khi bấm nút [X]
         btnModalClose.addEventListener('click', closeImageViewer);
-        btnModalPrev.addEventListener('click', (e) => { e.stopPropagation(); if(currentModalIndex>0){currentModalIndex--; renderModalContent(); resetZoom(false);} });
-        btnModalNext.addEventListener('click', (e) => { e.stopPropagation(); if(currentModalIndex<imageItems.length-1){currentModalIndex++; renderModalContent(); resetZoom(false);} });
+        btnModalPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPrevImage();
+        });
+        btnModalNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showNextImage();
+        });
+
         btnZoomIn.addEventListener('click', () => zoomTo(currentZoom + 0.25, null, null, true));
         btnZoomOut.addEventListener('click', () => zoomTo(currentZoom - 0.25, null, null, true));
         btnZoomFit.addEventListener('click', () => resetZoom(true));
 
-        window.addEventListener('resize', () => { if (!modalViewer.classList.contains('hidden')) { const c = clampPan(currentZoom, panX, panY); panX = c.x; panY = c.y; applyTransform(false); } });
-        
-        window.addEventListener('keydown', (e) => {
-            if (modalViewer.classList.contains('hidden')) return;
-            const focusables = Array.from(modalViewer.querySelectorAll('button:not(:disabled)'));
-            if (!modalViewer.contains(document.activeElement)) { e.preventDefault(); focusables[0]?.focus(); }
-            if (e.key === 'Escape') closeImageViewer();
-            else if (e.key === 'Home') { currentModalIndex = 0; renderModalContent(); resetZoom(false); }
-            else if (e.key === 'End') { currentModalIndex = imageItems.length - 1; renderModalContent(); resetZoom(false); }
-            else if (currentZoom > 1.05) {
-                if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
-                    e.preventDefault();
-                    if(e.key==='ArrowLeft') panX+=60; else if(e.key==='ArrowRight') panX-=60;
-                    else if(e.key==='ArrowUp') panY+=60; else if(e.key==='ArrowDown') panY-=60;
-                    const c = clampPan(currentZoom, panX, panY); panX=c.x; panY=c.y; applyTransform(true);
-                }
-            } else {
-                if(e.key==='ArrowLeft') showPrevImage(); else if(e.key==='ArrowRight') showNextImage();
+        // Tự động cân chỉnh toạ độ khi xoay màn hình hoặc resize cửa sổ
+        window.addEventListener('resize', () => {
+            if (!modalViewer.classList.contains('hidden')) {
+                const clamped = clampPan(currentZoom, panX, panY);
+                panX = clamped.x;
+                panY = clamped.y;
+                applyTransform(false);
             }
         });
 
+        // BẢO VỆ TIÊU ĐIỂM: Khóa phím Tab tuần hoàn trong modal và chặn thoát ra ngoài
+        function handleModalFocusTrap(e) {
+            if (e.key !== 'Tab' || modalViewer.classList.contains('hidden')) return;
+
+            const focusableElements = Array.from(modalViewer.querySelectorAll('button:not(:disabled)'));
+            if (focusableElements.length === 0) return;
+
+            const firstEl = focusableElements[0];
+            const lastEl = focusableElements[focusableElements.length - 1];
+
+            if (!modalViewer.contains(document.activeElement)) {
+                e.preventDefault();
+                firstEl.focus();
+                return;
+            }
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstEl) {
+                    e.preventDefault();
+                    lastEl.focus();
+                }
+            } else {
+                if (document.activeElement === lastEl) {
+                    e.preventDefault();
+                    firstEl.focus();
+                }
+            }
+        }
+
+        // Phím tắt bàn phím: Escape, Zoom, Mũi tên, Home (đầu trang), End (cuối trang)
+        window.addEventListener('keydown', (e) => {
+            if (modalViewer.classList.contains('hidden')) return;
+
+            handleModalFocusTrap(e);
+
+            if (e.key === 'Escape') {
+                closeImageViewer();
+                return;
+            }
+
+            if (e.key === 'Home') {
+                e.preventDefault();
+                currentModalIndex = 0;
+                renderModalContent();
+                resetZoom(false);
+                return;
+            }
+
+            if (e.key === 'End') {
+                e.preventDefault();
+                currentModalIndex = imageItems.length - 1;
+                renderModalContent();
+                resetZoom(false);
+                return;
+            }
+
+            if (e.key === '+' || e.key === '=') {
+                zoomTo(currentZoom + 0.25, null, null, true);
+                return;
+            }
+            if (e.key === '-' || e.key === '_') {
+                zoomTo(currentZoom - 0.25, null, null, true);
+                return;
+            }
+            if (e.key === '0') {
+                resetZoom(true);
+                return;
+            }
+
+            const PAN_STEP = 60;
+            if (currentZoom > 1.05) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const clamped = clampPan(currentZoom, panX + PAN_STEP, panY);
+                    panX = clamped.x; panY = clamped.y;
+                    applyTransform(true);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const clamped = clampPan(currentZoom, panX - PAN_STEP, panY);
+                    panX = clamped.x; panY = clamped.y;
+                    applyTransform(true);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const clamped = clampPan(currentZoom, panX, panY + PAN_STEP);
+                    panX = clamped.x; panY = clamped.y;
+                    applyTransform(true);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const clamped = clampPan(currentZoom, panX, panY - PAN_STEP);
+                    panX = clamped.x; panY = clamped.y;
+                    applyTransform(true);
+                }
+            } else {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    showPrevImage();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    showNextImage();
+                }
+            }
+        });
+
+        // 1. Zoom bằng con lăn chuột / Trackpad (Đồng bộ lại mốc chuột nếu đang kéo)
         modalViewport.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const factor = Math.abs(e.deltaY) >= 50 ? (e.deltaY < 0 ? 1.25 : 0.75) : Math.exp(-e.deltaY * 0.003);
-            zoomTo(currentZoom * factor, e.clientX, e.clientY, false);
-            if (isDragging) { startX = e.clientX - panX; startY = e.clientY - panY; }
+            let nextZoom;
+            if (Math.abs(e.deltaY) >= 50) {
+                const step = e.deltaY < 0 ? 0.25 : -0.25;
+                nextZoom = currentZoom + step;
+            } else {
+                const factor = Math.exp(-e.deltaY * 0.003);
+                nextZoom = currentZoom * factor;
+            }
+            zoomTo(nextZoom, e.clientX, e.clientY, false);
+
+            if (isDragging) {
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+            }
         }, { passive: false });
 
+        // 2. Kéo ảnh bằng chuột khi Zoom > 1 (Triệt tiêu hoàn toàn vùng chết khi đảo chiều)
         modalViewport.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar') || currentZoom <= 1.05) return;
-            isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; modalViewport.classList.add('is-dragging');
+            if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar')) return;
+            if (currentZoom <= 1.05) return;
+
+            isDragging = true;
+            hasMoved = false;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            modalViewport.classList.add('is-dragging');
         });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            const c = clampPan(currentZoom, e.clientX - startX, e.clientY - startY);
-            panX = c.x; panY = c.y; startX = e.clientX - c.x; startY = e.clientY - c.y; applyTransform(false);
+            const newRawX = e.clientX - startX;
+            const newRawY = e.clientY - startY;
+
+            if (Math.abs(newRawX - panX) > 4 || Math.abs(newRawY - panY) > 4) {
+                hasMoved = true;
+            }
+
+            const clamped = clampPan(currentZoom, newRawX, newRawY);
+            panX = clamped.x;
+            panY = clamped.y;
+
+            startX = e.clientX - clamped.x;
+            startY = e.clientY - clamped.y;
+
+            applyTransform(false);
         });
 
-        window.addEventListener('mouseup', () => { isDragging = false; modalViewport.classList.remove('is-dragging'); });
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            modalViewport.classList.remove('is-dragging');
+        });
 
+        // 3. Cảm ứng di động: Pinch Zoom chuẩn ngón tay & Vuốt ngang chuyển ảnh
         modalViewport.addEventListener('touchstart', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
-            if (e.touches.length > 1 || currentZoom > 1.05) e.preventDefault();
-            if (e.touches.length === 1) { isDragging = true; touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
-            else if (e.touches.length === 2) { isDragging = false; initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); initialZoomOnPinch = currentZoom; initialMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2; initialMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2; initialPanX = panX; initialPanY = panY; }
+
+            if (e.touches.length > 1 || currentZoom > 1.05) {
+                e.preventDefault();
+            }
+
+            if (e.touches.length === 1) {
+                isDragging = true;
+                hasMoved = false;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                startX = e.touches[0].clientX - panX;
+                startY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+
+                initialPinchDistance = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+                initialZoomOnPinch = currentZoom;
+                initialMidX = (t0.clientX + t1.clientX) / 2;
+                initialMidY = (t0.clientY + t1.clientY) / 2;
+                initialPanX = panX;
+                initialPanY = panY;
+            }
         }, { passive: false });
 
         modalViewport.addEventListener('touchmove', (e) => {
             if (e.target.closest('.btn-modal-nav')) return;
-            if (e.touches.length > 1 || currentZoom > 1.05) e.preventDefault();
+
             if (e.touches.length === 1 && isDragging) {
-                const c = clampPan(currentZoom, e.touches[0].clientX - startX, e.touches[0].clientY - startY);
-                panX = c.x; panY = c.y; startX = e.touches[0].clientX - c.x; startY = e.touches[0].clientY - c.y; applyTransform(false);
+                const touch = e.touches[0];
+                const newRawX = touch.clientX - startX;
+                const newRawY = touch.clientY - startY;
+
+                const diffX = touch.clientX - touchStartX;
+                const diffY = touch.clientY - touchStartY;
+
+                if (Math.abs(diffX) > Math.abs(diffY) || currentZoom > 1.05) {
+                    e.preventDefault();
+                }
+
+                if (Math.abs(newRawX - panX) > 5 || Math.abs(newRawY - panY) > 5) {
+                    hasMoved = true;
+                }
+
+                if (currentZoom > 1.05) {
+                    const clamped = clampPan(currentZoom, newRawX, newRawY);
+                    panX = clamped.x;
+                    panY = clamped.y;
+                    startX = touch.clientX - clamped.x;
+                    startY = touch.clientY - clamped.y;
+                    applyTransform(false);
+                }
             } else if (e.touches.length === 2 && initialPinchDistance > 0) {
-                const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                const zoom = Math.min(Math.max(initialZoomOnPinch * (d / initialPinchDistance), 0.5), 4.0);
-                const ratio = zoom / initialZoomOnPinch;
-                const fx = (e.touches[0].clientX + e.touches[1].clientX)/2 - (modalViewport.getBoundingClientRect().left + modalViewport.clientWidth/2);
-                const fy = (e.touches[0].clientY + e.touches[1].clientY)/2 - (modalViewport.getBoundingClientRect().top + modalViewport.clientHeight/2);
-                panX = fx - (fx - initialPanX) * ratio; panY = fy - (fy - initialPanY) * ratio; currentZoom = zoom; applyTransform(false);
+                e.preventDefault();
+                const t0 = e.touches[0];
+                const t1 = e.touches[1];
+
+                const currentDistance = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+                const currentMidX = (t0.clientX + t1.clientX) / 2;
+                const currentMidY = (t0.clientY + t1.clientY) / 2;
+
+                const scaleFactor = currentDistance / initialPinchDistance;
+                const targetZoom = Math.min(Math.max(initialZoomOnPinch * scaleFactor, 0.5), 4.0);
+
+                const rect = modalViewport.getBoundingClientRect();
+                const focalX = initialMidX - (rect.left + rect.width / 2);
+                const focalY = initialMidY - (rect.top + rect.height / 2);
+                const zoomRatio = targetZoom / initialZoomOnPinch;
+
+                const nextPanX = focalX - (focalX - initialPanX) * zoomRatio + (currentMidX - initialMidX);
+                const nextPanY = focalY - (focalY - initialPanY) * zoomRatio + (currentMidY - initialMidY);
+
+                currentZoom = targetZoom;
+                const clamped = clampPan(currentZoom, nextPanX, nextPanY);
+                panX = clamped.x;
+                panY = clamped.y;
+                applyTransform(false);
             }
         }, { passive: false });
 
         modalViewport.addEventListener('touchend', (e) => {
+            if (e.target.closest('.btn-modal-nav')) return;
+
             if (currentZoom <= 1.05 && e.changedTouches.length === 1 && e.touches.length === 0) {
-                const diffX = e.changedTouches[0].clientX - touchStartX;
-                if (Math.abs(diffX) > 50) diffX < 0 ? showNextImage() : showPrevImage();
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchEndX - touchStartX;
+                const diffY = touchEndY - touchStartY;
+
+                if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+                    if (diffX < 0) {
+                        showNextImage();
+                    } else {
+                        showPrevImage();
+                    }
+                }
             }
-            isDragging = false; initialPinchDistance = 0;
+
+            isDragging = false;
+            if (e.touches.length < 2) {
+                initialPinchDistance = 0;
+            }
         });
 
-        async function renderCleanCanvasForPdf(file, reusableCanvas) {
-            const bitmap = await loadSafeBitmap(file);
-            let sourceImage = bitmap || await new Promise((resolve) => {
-                const url = URL.createObjectURL(file);
-                const img = new Image();
-                img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-                img.src = url;
-            });
-            let targetWidth = sourceImage.width || sourceImage.naturalWidth;
-            let targetHeight = sourceImage.height || sourceImage.naturalHeight;
-            if (targetWidth > MAX_CANVAS_DIMENSION || targetHeight > MAX_CANVAS_DIMENSION) {
-                const ratio = MAX_CANVAS_DIMENSION / Math.max(targetWidth, targetHeight);
-                targetWidth *= ratio; targetHeight *= ratio;
+        // ==========================================
+        // CÁC SỰ KIỆN NẠP FILE & XUẤT PDF
+        // ==========================================
+        fileInput.addEventListener('change', (e) => {
+            if (isExporting || isIngesting) return;
+            if (e.target.files && e.target.files.length > 0) {
+                handleIncomingFiles(e.target.files);
+                fileInput.value = '';
             }
-            reusableCanvas.width = targetWidth; reusableCanvas.height = targetHeight;
+        });
+
+        // Bộ đếm Drag Counter triệt tiêu hoàn toàn lỗi nhấp nháy vùng kéo thả
+        dropZone.addEventListener('dragenter', (e) => {
+            if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter++;
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                dropZone.classList.remove('dragover');
+            }
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter = 0;
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleIncomingFiles(e.dataTransfer.files);
+            }
+        });
+
+        // Bắt lỗi dán ảnh từ clipboard (Khóa dán khi modal viewer đang mở)
+        window.addEventListener('paste', (e) => {
+            if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (!clipboardData) return;
+
+            const pastedFiles = [];
+            const items = clipboardData.items || [];
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        pastedFiles.push(file);
+                    }
+                }
+            }
+
+            if (pastedFiles.length > 0) {
+                handleIncomingFiles(pastedFiles);
+            } else if (items.length > 0) {
+                updateStatus('Dữ liệu trong bộ nhớ tạm (clipboard) không phải là tập tin hình ảnh hợp lệ.', 'error');
+            }
+        });
+
+        // Xoá an toàn 2 bước: Đồng bộ hoàn toàn màu sắc và câu hướng dẫn
+        btnClearAll.addEventListener('click', () => {
+            if (isExporting || imageItems.length === 0) return;
+
+            if (!clearAllConfirmPending) {
+                clearAllConfirmPending = true;
+                btnClearAll.className = 'btn btn-warning';
+                btnClearAll.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    Chắc chắn xoá?
+                `;
+                clearAllTimeout = setTimeout(() => {
+                    resetClearAllButton();
+                    updateStatus('Đã huỷ thao tác xoá toàn bộ danh sách.', 'info');
+                }, 3000);
+                updateStatus('Bấm thêm một lần nữa vào nút màu cam để xác nhận xoá toàn bộ danh sách.', 'warning');
+                return;
+            }
+
+            resetClearAllButton();
+            imageItems.forEach(item => URL.revokeObjectURL(item.previewUrl));
+            imageItems = [];
+            renderImageList();
+            updateStatus('Đã làm trống toàn bộ danh sách.', 'info');
+        });
+
+        btnReverseOrder.addEventListener('click', () => {
+            if (isExporting || imageItems.length <= 1) return;
+            imageItems.reverse();
+            renderImageList();
+            updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
+        });
+
+        // Vẽ ảnh lên Canvas tối ưu: Nền trắng chống đen PNG & giới hạn 4096px bảo vệ bộ nhớ
+        async function renderCleanCanvasForPdf(file, reusableCanvas) {
+            let sourceImage = null;
+            let srcWidth = 0;
+            let srcHeight = 0;
+
+            const bitmap = await loadSafeBitmap(file);
+            if (bitmap) {
+                sourceImage = bitmap;
+                srcWidth = bitmap.width;
+                srcHeight = bitmap.height;
+            } else {
+                sourceImage = await new Promise((resolve, reject) => {
+                    const tempUrl = URL.createObjectURL(file);
+                    const img = new Image();
+                    img.onload = () => {
+                        URL.revokeObjectURL(tempUrl);
+                        resolve(img);
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(tempUrl);
+                        reject(new Error('Không thể tải ảnh fallback'));
+                    };
+                    img.src = tempUrl;
+                });
+                srcWidth = sourceImage.naturalWidth;
+                srcHeight = sourceImage.naturalHeight;
+            }
+
+            let targetWidth = srcWidth;
+            let targetHeight = srcHeight;
+            if (targetWidth > MAX_CANVAS_DIMENSION || targetHeight > MAX_CANVAS_DIMENSION) {
+                if (targetWidth > targetHeight) {
+                    targetHeight = Math.round((targetHeight * MAX_CANVAS_DIMENSION) / targetWidth);
+                    targetWidth = MAX_CANVAS_DIMENSION;
+                } else {
+                    targetWidth = Math.round((targetWidth * MAX_CANVAS_DIMENSION) / targetHeight);
+                    targetHeight = MAX_CANVAS_DIMENSION;
+                }
+            }
+
+            reusableCanvas.width = targetWidth;
+            reusableCanvas.height = targetHeight;
             const ctx = reusableCanvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
             ctx.drawImage(sourceImage, 0, 0, targetWidth, targetHeight);
-            if (sourceImage.close) sourceImage.close();
-            return { width: targetWidth, height: targetHeight, canvas: reusableCanvas };
+
+            if (sourceImage.close) {
+                sourceImage.close();
+            }
+
+            return {
+                width: targetWidth,
+                height: targetHeight,
+                canvas: reusableCanvas
+            };
         }
 
         btnExportPdf.addEventListener('click', async () => {
             if (isExporting) return;
+
+            if (imageItems.length === 0) {
+                updateStatus('Danh sách đang trống. Vui lòng thêm ít nhất một hình ảnh trước khi tạo PDF.', 'error');
+                return;
+            }
+
+            if (typeof window.jspdf === 'undefined') {
+                updateStatus('Lỗi: Thư viện tạo PDF không khả dụng. Vui lòng kiểm tra lại kết nối mạng.', 'error');
+                return;
+            }
+
             setExportingState(true);
             updateStatus('Đang khởi tạo tài liệu PDF...', 'info');
+
+            let currentProcessingIndex = 0;
             const reusableCanvas = document.createElement('canvas');
+
             try {
                 const { jsPDF } = window.jspdf;
-                let doc = null;
-                for (let i = 0; i < imageItems.length; i++) {
-                    updateStatus(`Đang xử lý trang ${i + 1}/${imageItems.length}...`, 'info');
-                    const render = await renderCleanCanvasForPdf(imageItems[i].file, reusableCanvas);
-                    if (i === 0) {
-                        doc = new jsPDF({ orientation: render.width >= render.height ? 'l' : 'p', unit: 'px', format: [render.width, render.height] });
-                    } else {
-                        doc.addPage([render.width, render.height], render.width >= render.height ? 'l' : 'p');
-                    }
-                    doc.addImage(render.canvas, 'JPEG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
+
+                // Xử lý trang đầu tiên
+                currentProcessingIndex = 0;
+                updateStatus(`Đang xử lý trang 1/${imageItems.length}...`, 'info');
+                const firstRender = await renderCleanCanvasForPdf(imageItems[0].file, reusableCanvas);
+                const firstOrient = firstRender.width >= firstRender.height ? 'l' : 'p';
+                
+                const doc = new jsPDF({
+                    orientation: firstOrient,
+                    unit: 'px',
+                    format: [firstRender.width, firstRender.height],
+                    hotfixes: ['px_scaling']
+                });
+
+                const pWidth1 = doc.internal.pageSize.getWidth();
+                const pHeight1 = doc.internal.pageSize.getHeight();
+                doc.addImage(firstRender.canvas, 'JPEG', 0, 0, pWidth1, pHeight1);
+
+                // Xử lý các trang tiếp theo cuốn chiếu
+                for (let i = 1; i < imageItems.length; i++) {
+                    currentProcessingIndex = i;
+                    updateStatus(`Đang xử lý và ghép trang ${i + 1}/${imageItems.length}...`, 'info');
+                    const currentRender = await renderCleanCanvasForPdf(imageItems[i].file, reusableCanvas);
+                    const orient = currentRender.width >= currentRender.height ? 'l' : 'p';
+
+                    doc.addPage([currentRender.width, currentRender.height], orient);
+
+                    const pWidth = doc.internal.pageSize.getWidth();
+                    const pHeight = doc.internal.pageSize.getHeight();
+                    doc.addImage(currentRender.canvas, 'JPEG', 0, 0, pWidth, pHeight);
                 }
-                const d = new Date();
-                doc.save(`anh_thanh_pdf_${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}${d.getSeconds().toString().padStart(2,'0')}.pdf`);
-                updateStatus(`Đã xuất thành công file PDF.`, 'success');
+
+                // Tên file chuẩn: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
+                const now = new Date();
+                const YYYY = now.getFullYear().toString();
+                const MM = String(now.getMonth() + 1).padStart(2, '0');
+                const DD = String(now.getDate()).padStart(2, '0');
+                const HH = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const SS = String(now.getSeconds()).padStart(2, '0');
+                
+                const fileName = `anh_thanh_pdf_${YYYY}${MM}${DD}_${HH}${mm}${SS}.pdf`;
+                doc.save(fileName);
+
+                updateStatus(`Đã xuất thành công file "${fileName}" (${imageItems.length} trang).`, 'success');
             } catch (err) {
-                updateStatus('Lỗi xuất PDF: Không thể giải mã ảnh.', 'error');
+                console.error('Lỗi xuất PDF:', err);
+                const failedItem = imageItems[currentProcessingIndex];
+                const failedName = failedItem ? escapeHtml(failedItem.name) : 'không xác định';
+                updateStatus(`Lỗi tại Trang ${currentProcessingIndex + 1} (${failedName}): Không thể giải mã dữ liệu ảnh để xuất PDF.`, 'error');
             } finally {
-                reusableCanvas.width = 1; reusableCanvas.height = 1;
+                reusableCanvas.width = 1;
+                reusableCanvas.height = 1;
                 setExportingState(false);
             }
         });
