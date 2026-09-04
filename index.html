@@ -143,7 +143,7 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Ẩn thẻ input an toàn trong cây dựng hình (Render Tree) với 100% đơn vị rem */
+        /* Ẩn thẻ input an toàn trong cây Render Tree với 100% đơn vị rem */
         .hidden-file-input {
             position: absolute;
             opacity: 0;
@@ -291,6 +291,75 @@
             align-items: center;
         }
 
+        /* KHỐI ĐIỀU KHIỂN CHẤT LƯỢNG ẢNH */
+        .quality-control-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.6rem;
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            background-color: var(--color-white);
+            user-select: none;
+        }
+
+        .quality-label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--color-dark);
+            white-space: nowrap;
+        }
+
+        .quality-slider {
+            width: 6rem;
+            height: 1.2rem;
+            accent-color: var(--color-primary);
+            cursor: pointer;
+        }
+
+        .quality-input-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .quality-input {
+            width: 3.2rem;
+            padding: 0.2rem 0.25rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            font-family: inherit;
+            color: var(--color-dark);
+            text-align: center;
+            border: 2px solid var(--color-border);
+            border-radius: 0.35rem;
+            background-color: var(--color-white);
+            outline: none;
+            -moz-appearance: textfield;
+            transition: border-color 0.2s;
+        }
+
+        .quality-input::-webkit-outer-spin-button,
+        .quality-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quality-input:focus {
+            border-color: var(--color-primary);
+        }
+
+        .quality-input:disabled, .quality-slider:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .quality-unit {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--color-panel);
+        }
+
         .list-section {
             border: 2px solid var(--color-border);
             border-radius: 0.5rem;
@@ -366,6 +435,11 @@
         .image-thumbnail-box:hover {
             border-color: var(--color-primary);
             transform: scale(1.02);
+        }
+
+        .image-thumbnail-box:focus-visible {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 0.15rem;
         }
 
         .image-thumbnail-box img {
@@ -467,6 +541,7 @@
             padding-top: 0.4rem;
         }
 
+        /* HỘP THÔNG BÁO TRẠNG THÁI: TRIỆT TIÊU HOÀN TOÀN LỖI TRÀN VIỀN */
         .status-box {
             padding: 0.5rem 1rem;
             border: 2px solid var(--color-border);
@@ -475,8 +550,9 @@
             margin-bottom: 1rem;
             font-size: 0.95rem;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 0.5rem;
+            min-width: 0;
         }
 
         .status-box.info {
@@ -504,6 +580,15 @@
             height: 1.2rem;
             fill: currentColor;
             flex-shrink: 0;
+            margin-top: 0.2rem;
+        }
+
+        .status-text {
+            flex: 1;
+            min-width: 0;
+            word-break: normal;
+            overflow-wrap: break-word;
+            line-height: 1.45;
         }
 
         /* MODAL VIEWER: GRID 100DVH */
@@ -721,6 +806,23 @@
             display: none;
         }
 
+        @media (max-width: 768px) {
+            .action-bar-right {
+                width: 100%;
+            }
+            .quality-control-box {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .quality-slider {
+                flex: 1;
+                min-width: 4rem;
+            }
+            #btn-export-pdf {
+                width: 100%;
+            }
+        }
+
         @media (max-width: 600px) {
             .btn-modal-nav {
                 width: 2.3rem;
@@ -745,6 +847,13 @@
                 min-width: 2.8rem;
                 padding: 0.35rem 0.4rem;
                 font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .modal-top-bar {
+                flex-wrap: wrap;
+                gap: 0.25rem;
             }
         }
     </style>
@@ -782,6 +891,15 @@
             </button>
         </div>
         <div class="action-bar-right">
+            <!-- BỘ ĐIỀU KHIỂN CHẤT LƯỢNG ẢNH: SLIDER + Ô GÕ SỐ -->
+            <div class="quality-control-box">
+                <span class="quality-label">Chất lượng:</span>
+                <input type="range" id="quality-slider" class="quality-slider" min="50" max="100" value="93" step="1" title="Kéo để chỉnh chất lượng nén ảnh">
+                <div class="quality-input-wrapper">
+                    <input type="number" id="quality-input" class="quality-input" min="50" max="100" value="93" step="1" title="Gõ số phần trăm chất lượng (50 - 100)">
+                    <span class="quality-unit">%</span>
+                </div>
+            </div>
             <button type="button" class="btn btn-success" id="btn-export-pdf" disabled>
                 <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
                 Tạo và tải file PDF
@@ -789,10 +907,10 @@
         </div>
     </div>
 
-    <!-- HỘP THÔNG BÁO TRẠNG THÁI -->
-    <div class="status-box info" id="status-box">
+    <!-- HỘP THÔNG BÁO TRẠNG THÁI: HỖ TRỢ TRÌNH ĐỌC MÀN HÌNH A11Y & CHỐNG TRÀN VIỀN -->
+    <div class="status-box info" id="status-box" role="status" aria-live="polite">
         <svg class="status-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-        <span id="status-text">Vui lòng chọn hoặc kéo thả các file ảnh vào hệ thống.</span>
+        <span id="status-text" class="status-text">Vui lòng chọn hoặc kéo thả các file ảnh vào hệ thống.</span>
     </div>
 
     <!-- DANH SÁCH ẢNH ĐÃ CHỌN -->
@@ -866,6 +984,9 @@
         // Lưu phần tử tập trung trước khi mở modal để khôi phục khi đóng
         let lastFocusedElement = null;
 
+        // Hệ số chất lượng nén ảnh JPEG (Mặc định: 0.93 tương đương 93%)
+        let exportQuality = 0.93;
+
         // Giới hạn cạnh lớn nhất khi nạp vào Canvas để chống tràn RAM sập tab
         const MAX_CANVAS_DIMENSION = 4096;
 
@@ -876,6 +997,8 @@
         const btnClearAll = document.getElementById('btn-clear-all');
         const btnReverseOrder = document.getElementById('btn-reverse-order');
         const btnExportPdf = document.getElementById('btn-export-pdf');
+        const qualitySlider = document.getElementById('quality-slider');
+        const qualityInput = document.getElementById('quality-input');
         const imageListContainer = document.getElementById('image-list-container');
         const emptyState = document.getElementById('empty-state');
         const totalCountEl = document.getElementById('total-count');
@@ -920,6 +1043,38 @@
         let initialPanY = 0;
         let touchStartX = 0;
         let touchStartY = 0;
+
+        // ==========================================================
+        // ĐỒNG BỘ 2 CHIỀU: BỘ ĐIỀU KHIỂN CHẤT LƯỢNG (SLIDER + SỐ)
+        // ==========================================================
+        function updateQualityValue(val) {
+            let num = parseInt(val, 10);
+            if (isNaN(num)) num = 93;
+            num = Math.max(50, Math.min(100, num));
+            qualitySlider.value = num;
+            qualityInput.value = num;
+            exportQuality = num / 100;
+        }
+
+        qualitySlider.addEventListener('input', (e) => {
+            updateQualityValue(e.target.value);
+        });
+
+        qualityInput.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value, 10);
+            if (!isNaN(val)) {
+                if (val > 100) val = 100;
+                qualitySlider.value = val;
+                exportQuality = val / 100;
+            }
+        });
+
+        qualityInput.addEventListener('blur', (e) => {
+            let val = parseInt(e.target.value, 10);
+            if (isNaN(val) || val < 50) val = 50;
+            if (val > 100) val = 100;
+            updateQualityValue(val);
+        });
 
         // BẢO VỆ TOÀN TRANG: Chặn chuyển hướng và hỗ trợ thả tệp ở bất kỳ đâu trên màn hình
         window.addEventListener('dragover', (e) => {
@@ -1024,6 +1179,8 @@
             btnClearAll.disabled = exporting;
             btnReverseOrder.disabled = exporting;
             fileInput.disabled = exporting;
+            qualitySlider.disabled = exporting;
+            qualityInput.disabled = exporting;
 
             if (exporting) {
                 btnBrowse.classList.add('is-disabled');
@@ -1111,7 +1268,7 @@
                     width: width,
                     height: height,
                     previewUrl: previewUrl,
-                    orientation: width > height ? 'landscape' : 'portrait'
+                    orientation: width >= height ? 'landscape' : 'portrait'
                 };
             } catch (err) {
                 if (previewUrl) {
@@ -1125,7 +1282,10 @@
         async function handleIncomingFiles(fileList) {
             if (isExporting || isIngesting || !modalViewer.classList.contains('hidden')) return;
 
-            const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+            // Kiểm tra kép cả MIME Type lẫn Đuôi mở rộng để khắc phục lỗi MIME rỗng trên Windows
+            const isImage = (f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|bmp|gif|svg)$/i.test(f.name);
+            const files = Array.from(fileList).filter(isImage);
+
             if (files.length === 0) {
                 updateStatus('Không tìm thấy tập tin hình ảnh hợp lệ nào.', 'error');
                 return;
@@ -1186,7 +1346,7 @@
                 const card = document.createElement('div');
                 card.className = 'image-item-card';
 
-                const orientationText = item.width > item.height ? 'Khổ ngang' : 'Khổ dọc';
+                const orientationText = item.width >= item.height ? 'Khổ ngang' : 'Khổ dọc';
                 const safeName = escapeHtml(item.name);
 
                 card.innerHTML = `
@@ -1324,8 +1484,10 @@
                 modalViewport.classList.remove('can-drag');
             }
 
-            btnZoomIn.disabled = (currentZoom >= 4.0);
-            btnZoomOut.disabled = (currentZoom <= 0.5);
+            // XỬ LÝ CHUẨN XÁC SỐ THỰC: Làm tròn 2 chữ số thập phân chống liệt khóa nút
+            const roundedZoom = Math.round(currentZoom * 100) / 100;
+            btnZoomIn.disabled = (roundedZoom >= 4.0);
+            btnZoomOut.disabled = (roundedZoom <= 0.5);
         }
 
         function zoomTo(targetZoom, focalScreenX = null, focalScreenY = null, animate = false) {
@@ -1559,7 +1721,7 @@
             }
         }, { passive: false });
 
-        // 2. Kéo ảnh bằng chuột khi Zoom > 1 (Triệt tiêu hoàn toàn vùng chết khi đảo chiều)
+        // 2. Kéo ảnh bằng chuột khi Zoom > 1 (Triệt tiêu vùng chết và bẫy chuột dính khi nhả ngoài cửa sổ)
         modalViewport.addEventListener('mousedown', (e) => {
             if (e.target.closest('.btn-modal-nav') || e.target.closest('.modal-top-bar')) return;
             if (currentZoom <= 1.05) return;
@@ -1573,6 +1735,14 @@
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
+
+            // BẪY CHUỘT DÍNH: Nếu chuột đã được nhả ở ngoài cửa sổ (e.buttons === 0), hủy kéo ngay
+            if (e.buttons === 0) {
+                isDragging = false;
+                modalViewport.classList.remove('is-dragging');
+                return;
+            }
+
             const newRawX = e.clientX - startX;
             const newRawY = e.clientY - startY;
 
@@ -1704,6 +1874,13 @@
             }
         });
 
+        // XỬ LÝ GIÁN ĐOẠN HỆ ĐIỀU HÀNH DI ĐỘNG (Cuộc gọi đến, chuông báo thức, kéo Control Center)
+        modalViewport.addEventListener('touchcancel', () => {
+            isDragging = false;
+            initialPinchDistance = 0;
+            modalViewport.classList.remove('is-dragging');
+        });
+
         // ==========================================
         // CÁC SỰ KIỆN NẠP FILE & XUẤT PDF
         // ==========================================
@@ -1810,8 +1987,8 @@
             updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
         });
 
-        // Vẽ ảnh lên Canvas tối ưu: Nền trắng chống đen PNG & giới hạn 4096px bảo vệ bộ nhớ
-        async function renderCleanCanvasForPdf(file, reusableCanvas) {
+        // Vẽ ảnh lên Canvas tối ưu: Nền trắng, khống chế 4096px và nén JPEG theo chất lượng người dùng chọn
+        async function renderCleanCanvasForPdf(file, reusableCanvas, quality) {
             let sourceImage = null;
             let srcWidth = 0;
             let srcHeight = 0;
@@ -1863,10 +2040,13 @@
                 sourceImage.close();
             }
 
+            // Xuất chuẩn JPEG theo đúng hệ số chất lượng người dùng lựa chọn (50% - 100%)
+            const optimizedDataUrl = reusableCanvas.toDataURL('image/jpeg', quality);
+
             return {
                 width: targetWidth,
                 height: targetHeight,
-                canvas: reusableCanvas
+                dataUrl: optimizedDataUrl
             };
         }
 
@@ -1883,8 +2063,13 @@
                 return;
             }
 
+            // Khóa cứng ngưỡng an toàn chất lượng từ 50% đến 100% trước khi xử lý
+            exportQuality = Math.max(0.5, Math.min(1.0, exportQuality));
+            const qualityPercent = Math.round(exportQuality * 100);
+            updateQualityValue(qualityPercent);
+
             setExportingState(true);
-            updateStatus('Đang khởi tạo tài liệu PDF...', 'info');
+            updateStatus(`Đang khởi tạo tài liệu PDF (Chất lượng ${qualityPercent}%)...`, 'info');
 
             let currentProcessingIndex = 0;
             const reusableCanvas = document.createElement('canvas');
@@ -1895,7 +2080,7 @@
                 // Xử lý trang đầu tiên
                 currentProcessingIndex = 0;
                 updateStatus(`Đang xử lý trang 1/${imageItems.length}...`, 'info');
-                const firstRender = await renderCleanCanvasForPdf(imageItems[0].file, reusableCanvas);
+                const firstRender = await renderCleanCanvasForPdf(imageItems[0].file, reusableCanvas, exportQuality);
                 const firstOrient = firstRender.width >= firstRender.height ? 'l' : 'p';
                 
                 const doc = new jsPDF({
@@ -1907,20 +2092,20 @@
 
                 const pWidth1 = doc.internal.pageSize.getWidth();
                 const pHeight1 = doc.internal.pageSize.getHeight();
-                doc.addImage(firstRender.canvas, 'JPEG', 0, 0, pWidth1, pHeight1);
+                doc.addImage(firstRender.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1, undefined, 'FAST');
 
                 // Xử lý các trang tiếp theo cuốn chiếu
                 for (let i = 1; i < imageItems.length; i++) {
                     currentProcessingIndex = i;
                     updateStatus(`Đang xử lý và ghép trang ${i + 1}/${imageItems.length}...`, 'info');
-                    const currentRender = await renderCleanCanvasForPdf(imageItems[i].file, reusableCanvas);
+                    const currentRender = await renderCleanCanvasForPdf(imageItems[i].file, reusableCanvas, exportQuality);
                     const orient = currentRender.width >= currentRender.height ? 'l' : 'p';
 
                     doc.addPage([currentRender.width, currentRender.height], orient);
 
                     const pWidth = doc.internal.pageSize.getWidth();
                     const pHeight = doc.internal.pageSize.getHeight();
-                    doc.addImage(currentRender.canvas, 'JPEG', 0, 0, pWidth, pHeight);
+                    doc.addImage(currentRender.canvas, 'JPEG', 0, 0, pWidth, pHeight, undefined, 'FAST');
                 }
 
                 // Tên file chuẩn: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
@@ -1935,7 +2120,8 @@
                 const fileName = `anh_thanh_pdf_${YYYY}${MM}${DD}_${HH}${mm}${SS}.pdf`;
                 doc.save(fileName);
 
-                updateStatus(`Đã xuất thành công file "${fileName}" (${imageItems.length} trang).`, 'success');
+                // Thông báo kết quả an toàn không bao giờ bị cấn viền
+                updateStatus(`Đã xuất thành công file PDF: "${fileName}" (${imageItems.length} trang, chất lượng ${qualityPercent}%).`, 'success');
             } catch (err) {
                 console.error('Lỗi xuất PDF:', err);
                 const failedItem = imageItems[currentProcessingIndex];
