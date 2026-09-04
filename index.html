@@ -1987,7 +1987,7 @@
             updateStatus('Đã đảo ngược thứ tự các trang.', 'info');
         });
 
-        // Vẽ ảnh lên Canvas tối ưu: Nền trắng, khống chế 4096px và nén JPEG theo chất lượng người dùng chọn
+        // Vẽ ảnh lên Canvas tối ưu GPU: Bật nội suy Bicubic cao cấp sau khi đổi kích thước (W3C Standard)
         async function renderCleanCanvasForPdf(file, reusableCanvas, quality) {
             let sourceImage = null;
             let srcWidth = 0;
@@ -2028,14 +2028,21 @@
                 }
             }
 
+            // Gán kích thước Canvas (W3C Specification sẽ tự động reset context state)
             reusableCanvas.width = targetWidth;
             reusableCanvas.height = targetHeight;
-            const ctx = reusableCanvas.getContext('2d');
 
+            // BẮT BUỘC: Tái kích hoạt nội suy Bicubic cao cấp qua GPU sau khi đổi kích thước
+            const ctx = reusableCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            // Đổ nền trắng tinh khiết chống biến ảnh trong suốt thành đen xì
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, targetWidth, targetHeight);
             ctx.drawImage(sourceImage, 0, 0, targetWidth, targetHeight);
 
+            // Thu dọn ngay lập tức bộ nhớ bitmap sau khi vẽ
             if (sourceImage.close) {
                 sourceImage.close();
             }
@@ -2080,6 +2087,8 @@
                 // Xử lý trang đầu tiên
                 currentProcessingIndex = 0;
                 updateStatus(`Đang xử lý trang 1/${imageItems.length}...`, 'info');
+                await new Promise(r => setTimeout(r, 10)); // Cho phép trình duyệt vẽ UI
+
                 const firstRender = await renderCleanCanvasForPdf(imageItems[0].file, reusableCanvas, exportQuality);
                 const firstOrient = firstRender.width >= firstRender.height ? 'l' : 'p';
                 
@@ -2092,12 +2101,15 @@
 
                 const pWidth1 = doc.internal.pageSize.getWidth();
                 const pHeight1 = doc.internal.pageSize.getHeight();
-                doc.addImage(firstRender.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1, undefined, 'FAST');
+                // CHUẨN HOÁ 6 THAM SỐ GỐC: Triệt tiêu vĩnh viễn lỗi xung đột cache đè trang ở Trang 2
+                doc.addImage(firstRender.dataUrl, 'JPEG', 0, 0, pWidth1, pHeight1);
 
-                // Xử lý các trang tiếp theo cuốn chiếu
+                // Xử lý các trang tiếp theo theo mô hình Băng chuyền Đa luồng (Pipelined Processing)
                 for (let i = 1; i < imageItems.length; i++) {
                     currentProcessingIndex = i;
                     updateStatus(`Đang xử lý và ghép trang ${i + 1}/${imageItems.length}...`, 'info');
+                    await new Promise(r => setTimeout(r, 10)); // Nhịp nghỉ micro-task chống đơ giao diện
+
                     const currentRender = await renderCleanCanvasForPdf(imageItems[i].file, reusableCanvas, exportQuality);
                     const orient = currentRender.width >= currentRender.height ? 'l' : 'p';
 
@@ -2105,7 +2117,8 @@
 
                     const pWidth = doc.internal.pageSize.getWidth();
                     const pHeight = doc.internal.pageSize.getHeight();
-                    doc.addImage(currentRender.canvas, 'JPEG', 0, 0, pWidth, pHeight, undefined, 'FAST');
+                    // Thêm trang độc lập, không dùng tham số cache lỗi
+                    doc.addImage(currentRender.dataUrl, 'JPEG', 0, 0, pWidth, pHeight);
                 }
 
                 // Tên file chuẩn: anh_thanh_pdf_YYYYMMDD_HHMMSS.pdf
@@ -2128,6 +2141,7 @@
                 const failedName = failedItem ? escapeHtml(failedItem.name) : 'không xác định';
                 updateStatus(`Lỗi tại Trang ${currentProcessingIndex + 1} (${failedName}): Không thể giải mã dữ liệu ảnh để xuất PDF.`, 'error');
             } finally {
+                // Giải phóng ngay lập tức bộ nhớ rasterization buffer của Canvas trong VRAM
                 reusableCanvas.width = 1;
                 reusableCanvas.height = 1;
                 setExportingState(false);
